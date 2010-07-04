@@ -169,7 +169,7 @@ int main()
 	pagesize = getpagesize();
 	simpletree proctree;
 
-	PROCTAB* ptab = openproc(PROC_FILLSTAT|PROC_FILLSTATUS|PROC_FILLMEM);
+	PROCTAB* ptab = openproc(PROC_FILLMEM);
 	proc_t* proc_details;
 	
 	while (proc_details = readproc(ptab, NULL))
