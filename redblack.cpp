@@ -17,7 +17,7 @@ class redblacknode {
 		redblacknode* right;
 		redblacknode(const int);
 		redblacknode* grandparent() const;
-		reblacknode* uncle() const;
+		redblacknode* uncle() const;
 };
 
 redblacknode* redblacknode::grandparent() const
@@ -30,7 +30,7 @@ redblacknode* redblacknode::grandparent() const
 
 redblacknode* redblacknode::uncle() const
 {
-	redblacknode* g = grandparent()
+	redblacknode* g = grandparent();
 	if (g) {
 		if (g->left == up)
 			return g->right;
@@ -49,19 +49,18 @@ redblacknode::redblacknode(const int v)
 	right = NULL;
 }
 
-
 class redblacktree {
 	public:
 		redblacknode* root;
-		void insertnode(const int, int, const redblacknode*);
+		void insertnode(int, redblacknode*, int);
 		redblacktree();
 	private:
 		int depth; //helps with drawing
-		void balanceinsert(const redblacknode*);
-		void rightrotate(const redblacknode*);
-		void leftrotate(const redblacknode*);
+		void balanceinsert(redblacknode*);
+		void rightrotate(redblacknode*);
+		void leftrotate(redblacknode*);
 			
-}
+};
 
 redblacktree::redblacktree()
 {
@@ -69,7 +68,7 @@ redblacktree::redblacktree()
 	depth = 0;
 }
 
-void redblacktree::rightrotate(const redblacknode* node)
+void redblacktree::rightrotate(redblacknode* node)
 {
 	if (!node)
 		return;
@@ -92,7 +91,7 @@ void redblacktree::rightrotate(const redblacknode* node)
 	node->up = leftnode;
 }
 
-void redblacktree::leftrotate(const redblacknode* node)
+void redblacktree::leftrotate(redblacknode* node)
 {
 	if (!node)
 		return;
@@ -115,7 +114,7 @@ void redblacktree::leftrotate(const redblacknode* node)
 	node->up = rightnode;
 }
 
-void redblacktree::balanceinsert(const redblacknode* node)
+void redblacktree::balanceinsert(redblacknode* node)
 {
 	if (node->up) {
 		if (node->up->colour == 0)
@@ -130,7 +129,7 @@ void redblacktree::balanceinsert(const redblacknode* node)
 
 		else {
 			if (node->up->right == node) {
-				leftrotate(node)
+				leftrotate(node);
 				rightrotate(node->grandparent());
 			}
 			else {
@@ -143,14 +142,11 @@ void redblacktree::balanceinsert(const redblacknode* node)
 		node->colour = 0;
 
 }
-				
-				
 
-
-void redblacktree::insertnode(const int v, const redbacknode* node, int deep = 1)
+void redblacktree::insertnode(int v, redblacknode* node, int deep = 1)
 {
 	if (node == NULL) {
-		root = new redblacknode(v)
+		root = new redblacknode(v);
 		root->colour = 0;
 		depth = deep;
 		return;
