@@ -54,13 +54,30 @@ class redblacktree {
 		redblacknode* root;
 		void insertnode(int, redblacknode*, int);
 		redblacktree();
+		~redblacktree();
 	private:
 		int depth; //helps with drawing
 		void balanceinsert(redblacknode*);
 		void rightrotate(redblacknode*);
 		void leftrotate(redblacknode*);
+		void free(redblacknode*);
 			
 };
+
+redblacktree::~redblacktree()
+{
+	free(root);
+}
+
+void redblacktree::free(redblacknode* v)
+{
+	if (v == NULL)
+		return;
+	free(v->left);
+	redblacknode* tmp = v->right;
+	delete v;
+	free(tmp);
+}
 
 redblacktree::redblacktree()
 {
