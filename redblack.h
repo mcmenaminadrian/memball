@@ -17,7 +17,7 @@ class redblacknode {
 class redblacktree {
 	public:
 		redblacknode* root;
-		void insertnode(int, redblacknode*, int);
+		void insertnode(int, redblacknode*, int d = 1);
 		redblacktree();
 		~redblacktree();
 	private:

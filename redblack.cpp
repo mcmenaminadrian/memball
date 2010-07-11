@@ -1,24 +1,11 @@
 #include <iostream>
+#include "redblack.h"
 
 using namespace std;
 
 // Copyright Adrian McMenamin 2010
 // Licensed under the GNU GPL version 2
 // or any later version at your discretion
-
-
-class redblacknode {
-
-	public:
-		int colour;
-		int value;
-		redblacknode* up;
-		redblacknode* left;
-		redblacknode* right;
-		redblacknode(const int);
-		redblacknode* grandparent() const;
-		redblacknode* uncle() const;
-};
 
 redblacknode* redblacknode::grandparent() const
 {
@@ -49,20 +36,6 @@ redblacknode::redblacknode(const int v)
 	right = NULL;
 }
 
-class redblacktree {
-	public:
-		redblacknode* root;
-		void insertnode(int, redblacknode*, int);
-		redblacktree();
-		~redblacktree();
-	private:
-		int depth; //helps with drawing
-		void balanceinsert(redblacknode*);
-		void rightrotate(redblacknode*);
-		void leftrotate(redblacknode*);
-		void free(redblacknode*);
-			
-};
 
 redblacktree::~redblacktree()
 {
@@ -87,12 +60,12 @@ redblacktree::redblacktree()
 
 void redblacktree::rightrotate(redblacknode* node)
 {
+	cout << " in right rotate ";
 	if (!node)
 		return;
 	redblacknode* par = node->up;
 	redblacknode* leftnode = node->left;
 	redblacknode* leftright = NULL;
-
 	if (par) {
 		if (par->left == node)
 			par->left = leftnode;
@@ -102,14 +75,18 @@ void redblacktree::rightrotate(redblacknode* node)
 	if (leftnode) {
 		leftright = leftnode->right;
 		leftnode->up = par;
+		if (!par)
+			root = leftnode;
 		leftnode->right = node;
 	}
 	node->left = leftright;
 	node->up = leftnode;
+	leftnode->colour = 0;
+	node->colour = 1;
 }
 
 void redblacktree::leftrotate(redblacknode* node)
-{
+{	cout << " in left rotate ";
 	if (!node)
 		return;
 	redblacknode* par = node->up;
@@ -125,6 +102,8 @@ void redblacktree::leftrotate(redblacknode* node)
 	if (rightnode) {
 		rightleft = rightnode->left;
 		rightnode->up = par;
+		if (!par)
+			root = rightnode;
 		rightnode->left = node;
 	}
 	node->right = rightleft;
@@ -134,62 +113,60 @@ void redblacktree::leftrotate(redblacknode* node)
 void redblacktree::balanceinsert(redblacknode* node)
 {
 	if (node->up) {
-		if (node->up->colour == 0)
-			return;
+		if (node->up->colour == 0) { cout << ": parent node is black, balancing completed" << endl;
+			return;}
 
-		if (node->uncle() && node->uncle()->colour == 1) {
+		if (node->uncle() && node->uncle()->colour == 1) { cout << ": parent and uncle both red, flipping colours ";
 			node->up->colour = 0;
 			node->uncle()->colour = 0;
-			node->grandparent()->colour = 1;
+			node->grandparent()->colour = 1; cout << ": checking grandparent with value " << node->grandparent()->value;
 			balanceinsert(node->grandparent());
-		}
-
-		else {
-			if (node->up->right == node) {
-				leftrotate(node);
+		} else {
+			if (node->grandparent()->left == node->up) {
+				if (node->up->right == node) 
+					leftrotate(node->up); 
 				rightrotate(node->grandparent());
-			}
-			else {
-				rightrotate(node);
+			} else {
+				if (node->up->left == node) 
+					rightrotate(node->up); 
 				leftrotate(node->grandparent());
 			}
 		}
+		cout << " node now points to " << node->value << " while root points to " << root->value << endl;
+		return;
 	}
-	else
-		node->colour = 0;
+	else { cout << " Changing root node with value " << node->value << " to black " << endl;
+		node->colour = 0;}
 
 }
 
-void redblacktree::insertnode(int v, redblacknode* node, int deep = 1)
+void redblacktree::insertnode(int v, redblacknode* node, int deep)
 {
-	if (node == NULL) {
+	cout << " Inserting " << v << " into RB tree at depth " << deep;
+	if (node == NULL) { cout << " and its the root node " << endl;
 		root = new redblacknode(v);
 		root->colour = 0;
 		depth = deep;
 		return;
 	}
-	if (v < node->value) {
+	if (v < node->value) { cout << " swing left..."; 
 		if (node->left == NULL) {
 			node->left = new redblacknode(v);
 			node->left->up = node;
 			node = node->left;
+			balanceinsert(node);
+			if (depth < deep) depth = deep;
 		} else 
-			insertnode(v, node->left, deep++);
-	} else {
+			insertnode(v, node->left, ++deep);
+	} else { cout << " swing right... v is " << v << " value is " << node->value;
 		if (node->right == NULL) {
 			node->right = new redblacknode(v);
 			node->right->up = node;
 			node = node->right;
+			balanceinsert(node);
+			if (depth < deep) depth = deep;
 		} else
-			insertnode(v, node->right, deep++);
+			insertnode(v, node->right, ++deep);
 	}
-	if (depth < deep) depth = deep;
-
-	//simple insertion done
-	//but reblancing may be required
-
-	balanceinsert(node);
-
-			
 }
 

@@ -173,6 +173,8 @@ int main()
 {
 	pagesize = getpagesize();
 	redblacktree* proctree = new redblacktree();
+	if (proctree-> root == NULL)
+		cout << "starting with a NULL" << endl;
 
 	PROCTAB* ptab = openproc(PROC_FILLMEM);
 	proc_t* proc_details;
@@ -191,8 +193,9 @@ int main()
 
 	closeproc(ptab);
 //	proctree.show_in_order(proctree.root);
-
-	show_preorder(proctree.root);
+	cout << endl;
+	show_preorder(proctree->root);
+	cout << endl;
 	delete proctree;	
 
 	return 1;
