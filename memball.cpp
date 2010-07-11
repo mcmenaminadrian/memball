@@ -1,5 +1,6 @@
 #include <iostream>
 #include "/usr/include/proc/readproc.h"
+#include "redblack.h"
 
 using namespace std;
 
@@ -154,11 +155,24 @@ void simpletree::insert_process_virt(process* p, node*& n)
 	}
 }
 
+void show_preorder(redblacknode* node)
+{
+	if (node == NULL)
+		return;
+	cout << node->value << ",";
+	if (node->colour == 0)
+		cout << "BLACK";
+	else
+		cout << "RED";
+	cout <<": ";
+	show_preorder(node->left);
+	show_preorder(node->right);
+}
 
 int main()
 {
 	pagesize = getpagesize();
-	simpletree proctree;
+	redblacktree* proctree = new redblacktree();
 
 	PROCTAB* ptab = openproc(PROC_FILLMEM);
 	proc_t* proc_details;
@@ -166,14 +180,20 @@ int main()
 	while (proc_details = readproc(ptab, NULL))
 	{
 		if (proc_details->resident) {
-			process* addp = new process();
-			addp->set_reserve_pages(proc_details->resident);
-			proctree.insert_process(addp);
+//			process* addp = new process();
+//			addp->set_reserve_pages(proc_details->resident);
+//			proctree.insert_process(addp);
+			int x = proc_details->resident;
+			redblacknode* tmp = proctree->root;
+			proctree->insertnode(x, tmp);
 		}
 	}
 
 	closeproc(ptab);
-	proctree.show_in_order(proctree.root);
+//	proctree.show_in_order(proctree.root);
+
+	show_preorder(proctree.root);
+	delete proctree;	
 
 	return 1;
 }
