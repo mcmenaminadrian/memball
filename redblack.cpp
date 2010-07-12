@@ -58,56 +58,83 @@ redblacktree::redblacktree()
 	depth = 0;
 }
 
-void redblacktree::rightrotate(redblacknode* node)
+void redblacktree::rotate2(redblacknode* node)
 {
-	cout << " in right rotate ";
-	if (!node)
+	cout << " in rotate2 ";
+	if (!node || !node->up)
 		return;
-	redblacknode* par = node->up;
-	redblacknode* leftnode = node->left;
-	redblacknode* leftright = NULL;
-	if (par) {
-		if (par->left == node)
-			par->left = leftnode;
-		else
-			par->right = leftnode;
+	redblacknode* gp = node->grandparent();
+	redblacknode* par = NULL;
+	
+	redblacknode* centrenode = node->up;
+	if (gp) {
+		par = gp->up;
+		if (par) {
+			if (par->left == gp)
+				par->left = centrenode;
+			else
+				par->right = centrenode;
+		} 
 	}
-	if (leftnode) {
-		leftright = leftnode->right;
-		leftnode->up = par;
-		if (!par)
-			root = leftnode;
-		leftnode->right = node;
+	
+	if (node->up->right == node)
+	{
+		redblacknode* centreleft = centrenode->left;
+		centrenode->colour = 0;
+		centrenode->left = gp;
+		if (gp) {
+			gp->up = centreleft;
+			gp->colour = 1;
+			gp->right = centreleft;
+		}
+	} else {
+		redblacknode* centreright = centrenode->right;
+		centrenode->colour = 0;
+		centrenode->right = gp;
+		if (gp) {
+			gp->up = centrenode;
+			gp->colour = 1;
+			gp->left = centreright;
+		}
 	}
-	node->left = leftright;
-	node->up = leftnode;
-	leftnode->colour = 0;
-	node->colour = 1;
+	centrenode->up = par;
+	if (!par)
+		root = centrenode;
+
+
 }
 
-void redblacktree::leftrotate(redblacknode* node)
-{	cout << " in left rotate ";
+void redblacktree::rotate1(redblacknode* node)
+{	cout << " in rotate1 ";
 	if (!node)
 		return;
 	redblacknode* par = node->up;
 	redblacknode* rightnode = node->right;
+	redblacknode* leftnode = node->left;
 	redblacknode* rightleft = NULL;
+	redblacknode* leftright = NULL;
 
 	if (par) {
-		if (par->left == node)
+		if (par->left == node) {
 			par->left = rightnode;
-		else
-			par->right = rightnode;
+			if (rightnode) {
+				rightleft = rightnode->left;
+				rightnode->up = par;
+				rightnode->left = node;
+			}
+			node->right = rightleft;
+			node->up = rightnode;
+		} else {
+			par->right = leftnode;
+			if (leftnode) {
+				leftright = leftnode->right;
+				leftnode->up = par;
+				leftnode->right = node;
+			}
+			node->left = leftright;
+			node->up = leftnode;
+		}
 	}
-	if (rightnode) {
-		rightleft = rightnode->left;
-		rightnode->up = par;
-		if (!par)
-			root = rightnode;
-		rightnode->left = node;
-	}
-	node->right = rightleft;
-	node->up = rightnode;
 }
 
 void redblacktree::balanceinsert(redblacknode* node)
@@ -122,17 +149,17 @@ void redblacktree::balanceinsert(redblacknode* node)
 			node->grandparent()->colour = 1; cout << ": checking grandparent with value " << node->grandparent()->value;
 			balanceinsert(node->grandparent());
 		} else {
+			
 			if (node->grandparent()->left == node->up) {
 				if (node->up->right == node) 
-					leftrotate(node->up); 
-				rightrotate(node->grandparent());
+					rotate1(node->up); 
+				rotate2(node);
 			} else {
 				if (node->up->left == node) 
-					rightrotate(node->up); 
-				leftrotate(node->grandparent());
+					rotate1(node->up); 
+				rotate2(node);
 			}
 		}
-		cout << " node now points to " << node->value << " while root points to " << root->value << endl;
 		return;
 	}
 	else { cout << " Changing root node with value " << node->value << " to black " << endl;
@@ -149,7 +176,7 @@ void redblacktree::insertnode(int v, redblacknode* node, int deep)
 		depth = deep;
 		return;
 	}
-	if (v < node->value) { cout << " swing left..."; 
+	if (v < node->value) { 
 		if (node->left == NULL) {
 			node->left = new redblacknode(v);
 			node->left->up = node;
@@ -158,7 +185,7 @@ void redblacktree::insertnode(int v, redblacknode* node, int deep)
 			if (depth < deep) depth = deep;
 		} else 
 			insertnode(v, node->left, ++deep);
-	} else { cout << " swing right... v is " << v << " value is " << node->value;
+	} else {
 		if (node->right == NULL) {
 			node->right = new redblacknode(v);
 			node->right->up = node;

@@ -23,8 +23,8 @@ class redblacktree {
 	private:
 		int depth; //helps with drawing
 		void balanceinsert(redblacknode*);
-		void rightrotate(redblacknode*);
-		void leftrotate(redblacknode*);
+		void rotate2(redblacknode*);
+		void rotate1(redblacknode*);
 		void free(redblacknode*);
 			
 };
