@@ -83,9 +83,11 @@ void redblacktree::rotate2(redblacknode* node)
 		centrenode->colour = 0;
 		centrenode->left = gp;
 		if (gp) {
-			gp->up = centreleft;
+			gp->up = centrenode;
 			gp->colour = 1;
 			gp->right = centreleft;
+			if (centreleft)
+				centreleft->up = gp;
 		}
 	} else {
 		redblacknode* centreright = centrenode->right;
@@ -95,6 +97,8 @@ void redblacktree::rotate2(redblacknode* node)
 			gp->up = centrenode;
 			gp->colour = 1;
 			gp->left = centreright;
+			if (centreright)
+				centreright->up = gp;
 		}
 	}
 	centrenode->up = par;
@@ -123,6 +127,8 @@ void redblacktree::rotate1(redblacknode* node)
 				rightnode->left = node;
 			}
 			node->right = rightleft;
+			if (rightleft)
+				rightleft->up = node;
 			node->up = rightnode;
 		} else {
 			par->right = leftnode;
@@ -132,6 +138,8 @@ void redblacktree::rotate1(redblacknode* node)
 				leftnode->right = node;
 			}
 			node->left = leftright;
+			if (leftright)
+				leftright->up = node;
 			node->up = leftnode;
 		}
 	}
@@ -151,12 +159,16 @@ void redblacktree::balanceinsert(redblacknode* node)
 		} else {
 			
 			if (node->grandparent()->left == node->up) {
-				if (node->up->right == node) 
-					rotate1(node->up); 
+				if (node->up->right == node){ 
+					rotate1(node->up);
+					node = node->left;
+				}
 				rotate2(node);
 			} else {
-				if (node->up->left == node) 
-					rotate1(node->up); 
+				if (node->up->left == node){
+					rotate1(node->up);
+					node = node->right;
+				}
 				rotate2(node);
 			}
 		}

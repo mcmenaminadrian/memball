@@ -188,6 +188,19 @@ int main()
 			int x = proc_details->resident;
 			redblacknode* tmp = proctree->root;
 			proctree->insertnode(x, tmp);
+		cout << "root has value " << proctree->root->value;
+			cout << " and colour " << proctree->root->colour;
+
+			if (proctree->root->left)
+			{
+				cout << ". Left has value " << proctree->root->left->value;
+			cout << " and colour " << proctree->root->left->colour;}
+			if (proctree->root->right)
+			{
+				cout << ". Right has value " << proctree->root->right->value;
+			cout << " and colour " << proctree->root->right->colour;}
+
+			cout << endl;
 		}
 	}
 
