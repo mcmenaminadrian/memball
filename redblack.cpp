@@ -36,7 +36,6 @@ redblacknode::redblacknode(const int v)
 	right = NULL;
 }
 
-
 redblacktree::~redblacktree()
 {
 	free(root);
@@ -206,4 +205,3 @@ void redblacktree::insertnode(int v, redblacknode* node, int deep)
 			insertnode(v, node->right, ++deep);
 	}
 }
-
