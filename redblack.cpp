@@ -60,7 +60,6 @@ redblacktree::redblacktree()
 
 void redblacktree::rotate2(redblacknode* node)
 {
-	cout << " in rotate2 ";
 	if (!node || !node->up)
 		return;
 	redblacknode* gp = node->grandparent();
@@ -109,7 +108,7 @@ void redblacktree::rotate2(redblacknode* node)
 }
 
 void redblacktree::rotate1(redblacknode* node)
-{	cout << " in rotate1 ";
+{
 	if (!node)
 		return;
 	redblacknode* par = node->up;
@@ -148,13 +147,13 @@ void redblacktree::rotate1(redblacknode* node)
 void redblacktree::balanceinsert(redblacknode* node)
 {
 	if (node->up) {
-		if (node->up->colour == 0) { cout << ": parent node is black, balancing completed" << endl;
+		if (node->up->colour == 0) {
 			return;}
 
-		if (node->uncle() && node->uncle()->colour == 1) { cout << ": parent and uncle both red, flipping colours ";
+		if (node->uncle() && node->uncle()->colour == 1) {
 			node->up->colour = 0;
 			node->uncle()->colour = 0;
-			node->grandparent()->colour = 1; cout << ": checking grandparent with value " << node->grandparent()->value;
+			node->grandparent()->colour = 1;
 			balanceinsert(node->grandparent());
 		} else {
 			
@@ -174,15 +173,14 @@ void redblacktree::balanceinsert(redblacknode* node)
 		}
 		return;
 	}
-	else { cout << " Changing root node with value " << node->value << " to black " << endl;
-		node->colour = 0;}
+	else 
+		node->colour = 0;
 
 }
 
 void redblacktree::insertnode(int v, redblacknode* node, int deep)
 {
-	cout << " Inserting " << v << " into RB tree at depth " << deep;
-	if (node == NULL) { cout << " and its the root node " << endl;
+	if (node == NULL) {
 		root = new redblacknode(v);
 		root->colour = 0;
 		depth = deep;
