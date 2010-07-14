@@ -18,6 +18,7 @@ class redblacktree {
 	public:
 		redblacknode* root;
 		void insertnode(int, redblacknode*, int d = 1);
+		bool removenode(int);
 		redblacktree();
 		~redblacktree();
 	private:
@@ -26,7 +27,9 @@ class redblacktree {
 		void rotate2(redblacknode*);
 		void rotate1(redblacknode*);
 		void free(redblacknode*);
-			
+		redblacknode* leftchain(redblacknode*);
+		redblacknode* maxleft(redblacknode*);
+		redblacknode* locatenode(int, redblacknode*);
 };
 
 #endif

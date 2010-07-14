@@ -57,6 +57,7 @@ redblacktree::redblacktree()
 	depth = 0;
 }
 
+// turn line of two reds and a black into black with two children
 void redblacktree::rotate2(redblacknode* node)
 {
 	if (!node || !node->up)
@@ -106,6 +107,7 @@ void redblacktree::rotate2(redblacknode* node)
 
 }
 
+//straighten zig zag of two reds
 void redblacktree::rotate1(redblacknode* node)
 {
 	if (!node)
@@ -205,3 +207,110 @@ void redblacktree::insertnode(int v, redblacknode* node, int deep)
 			insertnode(v, node->right, ++deep);
 	}
 }
+
+redblacknode* redblacktree::locatenode(int v, redblacknode* node)
+{
+	if (node == NULL)
+		return node;
+	if (v == node->value)
+		return node;
+	if (v < node->value)
+		locatenode(v, node->left);
+	else
+		locatenode(v, node->right);
+}
+
+redblacknode* redblacktree::maxleft(redblacknode* node)
+{
+	if (node->right)
+		maxleft(node->right);
+	return node;
+}
+
+redblacknode* redblacktree::leftchain(redblacknode* node)
+{
+	if (node->left)
+		leftchain(node->left);
+	return node;
+}
+
+bool redblacktree::removenode(int v)
+{
+	redblacknode* located = locatenode(v, root);
+	redblacknode* altnode = NULL;
+	if (located == NULL)
+		return false;
+
+	redblacknode* lefty = located->left;
+	redblacknode* righty =  located->right;
+	if (lefty && righty)
+		altnode = maxleft(located->left);
+
+	redblacknode* par = located->up;
+	int colour_to_go = located->colour;
+
+	if (altnode) {
+		redblacknode* endleftchain = leftchain(altnode);
+		redblacknode* altpar = altnode->up;
+
+		if (altpar != located) {
+			if (altpar->left == altnode)
+				altpar->left = NULL;
+			else
+				altpar->right = NULL;
+		}
+
+		if (par) {
+			if (par->left == located)
+				par->left = altnode;
+			else
+				par->right = altnode;
+		}
+		else
+			root = altnode;
+
+
+		//we know lefty and rigty and non-NULL
+		lefty->up = endleftchain;
+		endleftchain->left = lefty;
+		altnode->right = righty;
+		righty->up = altnode;
+	} else {
+		if (lefty) {
+			lefty->up = par;
+			if (par) {
+				if (par->left == located)
+					par->left = lefty;
+				else
+					par->right = lefty;
+			}
+			else
+				root = lefty;
+		}
+		else if (righty) {
+			righty->up = par;
+			if (par) {
+				if (par->right == located)
+					par->right = righty;
+				else
+					par->left = righty;
+			}
+			else
+				root = righty;
+		} else {
+			if (par) {
+				if (par->right == located)
+					par->right = NULL;
+				else
+					par->left = NULL;
+			}
+			else
+				root = NULL;
+		}
+	}
+
+	delete located;
+	located = NULL;
+	return true;
+}
+
