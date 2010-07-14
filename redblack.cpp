@@ -221,17 +221,19 @@ redblacknode* redblacktree::locatenode(int v, redblacknode* node)
 }
 
 redblacknode* redblacktree::maxleft(redblacknode* node)
-{
+{	cout << "testing at " << node->value << endl;
 	if (node->right)
 		maxleft(node->right);
-	return node;
+	else
+		return node;
 }
 
 redblacknode* redblacktree::leftchain(redblacknode* node)
 {
 	if (node->left)
 		leftchain(node->left);
-	return node;
+	else
+		return node;
 }
 
 bool redblacktree::removenode(int v)
@@ -243,8 +245,9 @@ bool redblacktree::removenode(int v)
 
 	redblacknode* lefty = located->left;
 	redblacknode* righty =  located->right;
-	if (lefty && righty)
+	if (lefty && righty){
 		altnode = maxleft(located->left);
+		cout << "Found max left at " << altnode->value << endl; }
 
 	redblacknode* par = located->up;
 	int colour_to_go = located->colour;
