@@ -295,7 +295,6 @@ bool redblacktree::removenode(int v)
 		}
 		int colourfix = altnode->colour;
 		altnode->colour = located->colour;
-		if (colourfix == 1) {
 
 		redblacknode* altpar = altnode->up;
 		if (altpar != located) {
