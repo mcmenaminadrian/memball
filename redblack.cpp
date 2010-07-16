@@ -220,6 +220,14 @@ redblacknode* redblacktree::locatenode(int v, redblacknode* node)
 		locatenode(v, node->right);
 }
 
+redblacknode* redblacktree::minright(redblacknode* node)
+{
+	if (node->left)
+		minright(node->left);
+	else
+		return node;
+}
+
 redblacknode* redblacktree::maxleft(redblacknode* node)
 {	cout << "testing at " << node->value << endl;
 	if (node->right)
@@ -228,18 +236,13 @@ redblacknode* redblacktree::maxleft(redblacknode* node)
 		return node;
 }
 
-redblacknode* redblacktree::leftchain(redblacknode* node)
-{
-	if (node->left)
-		leftchain(node->left);
-	else
-		return node;
-}
-
 bool redblacktree::removenode(int v)
 {
 	redblacknode* located = locatenode(v, root);
 	redblacknode* altnode = NULL;
+	redblacknode* altlc = NULL;
+	redblacknode* altrc = NULL;
+	int alt = 0;
 	if (located == NULL)
 		return false;
 
@@ -247,21 +250,21 @@ bool redblacktree::removenode(int v)
 	redblacknode* righty =  located->right;
 	if (lefty && righty){
 		altnode = maxleft(located->left);
-		cout << "Found max left at " << altnode->value << endl; }
+		if (altnode->colour == 0) {
+			altnode = minright(located->right);
+			altrc = altnode->right;
+			alt = 2;
+		}
+		else {
+			alt = 1;
+			altlc = altnode->left;
+		}
+		cout << "Found max left at " << altnode->value << endl;
+	}
 
 	redblacknode* par = located->up;
-	int colour_to_go = located->colour;
 
 	if (altnode) {
-		redblacknode* endleftchain = leftchain(altnode);
-		redblacknode* altpar = altnode->up;
-
-		if (altpar != located) {
-			if (altpar->left == altnode)
-				altpar->left = NULL;
-			else
-				altpar->right = NULL;
-		}
 
 		if (par) {
 			if (par->left == located)
@@ -272,12 +275,42 @@ bool redblacktree::removenode(int v)
 		else
 			root = altnode;
 
+		//we know lefty and righty are non-NULL
+		if (alt == 2) {
+			lefty->up = altnode;
+			altnode->left = lefty;
+			if (altnode != righty) {
+				righty->up = altnode;
+				altnode->right = righty;
+			} else
+				altnode->right = NULL;
+		} else {
+			righty->up = altnode;
+			altnode->right = righty;
+			if (altnode != lefty) {
+				altnode->left = lefty;
+				lefty->up = altnode;
+			} else
+				altnode->left = NULL;
+		}
+		int colourfix = altnode->colour;
+		altnode->colour = located->colour;
+		if (colourfix == 1) {
 
-		//we know lefty and rigty and non-NULL
-		lefty->up = endleftchain;
-		endleftchain->left = lefty;
-		altnode->right = righty;
-		righty->up = altnode;
+		redblacknode* altpar = altnode->up;
+		if (altpar != located) {
+			if (altpar->left == altnode)
+				altpar->left = altlc;
+			else
+				altpar->right = altrc;
+		}
+
+		if (colourfix == 1)
+			goto out;
+			
+
+		/* FIX ME - balancing code */
+		
 	} else {
 		if (lefty) {
 			lefty->up = par;
@@ -312,6 +345,7 @@ bool redblacktree::removenode(int v)
 		}
 	}
 
+out:
 	delete located;
 	located = NULL;
 	return true;

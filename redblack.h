@@ -27,8 +27,8 @@ class redblacktree {
 		void rotate2(redblacknode*);
 		void rotate1(redblacknode*);
 		void free(redblacknode*);
-		redblacknode* leftchain(redblacknode*);
 		redblacknode* maxleft(redblacknode*);
+		redblacknode* minright(redblacknode*);
 		redblacknode* locatenode(int, redblacknode*);
 };
 
