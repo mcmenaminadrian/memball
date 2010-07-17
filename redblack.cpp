@@ -27,6 +27,25 @@ redblacknode* redblacknode::uncle() const
 	return NULL;
 }
 
+redblacknode* redblacknode::sibling() const
+{
+	if (!up)
+		return NULL;
+	if (up->left == this)
+		return up->right;
+	else
+		return up->left;
+}
+
+bool redblacknode::bothchildrenblack() const
+{
+	if (right && right->colour == 1)
+		return false;
+	if (left && left->colour == 1)
+		return false;
+	return true;
+}
+
 redblacknode::redblacknode(const int v)
 {
 	colour = 1; //red
@@ -221,7 +240,8 @@ redblacknode* redblacktree::locatenode(int v, redblacknode* node)
 }
 
 redblacknode* redblacktree::minright(redblacknode* node)
-{
+{cout << "testing right at " << node->value << endl;
+
 	if (node->left)
 		minright(node->left);
 	else
@@ -259,11 +279,11 @@ bool redblacktree::removenode(int v)
 			alt = 1;
 			altlc = altnode->left;
 		}
-		cout << "Found max left at " << altnode->value << endl;
 	}
 
 	redblacknode* par = located->up;
 
+	//case of two non-leaf children
 	if (altnode) {
 
 		if (par) {
@@ -293,9 +313,12 @@ bool redblacktree::removenode(int v)
 			} else
 				altnode->left = NULL;
 		}
+		//colour the replacement node
 		int colourfix = altnode->colour;
 		altnode->colour = located->colour;
 
+		//fix up the links for the node replacing the deleted node
+		//remembering only left or right children can be non-null
 		redblacknode* altpar = altnode->up;
 		if (altpar != located) {
 			if (altpar->left == altnode)
@@ -304,10 +327,35 @@ bool redblacktree::removenode(int v)
 				altpar->right = altrc;
 		}
 
+		// was just red so no problem
 		if (colourfix == 1)
 			goto out;
-			
 
+		else {  // children are red so just recolour to maintain
+			// black height
+			if (altlc) {
+				if (altlc->colour == 1) {
+					altlc->colour = 0;
+					goto out;
+				}
+			}
+			else {
+				if (altrc->colour == 1) {
+					altrc->colour = 0;
+					goto out;
+				}
+			}
+		}
+
+		// new node and sibling both black, so cut black height by one
+		// on both sides - if children are black
+		if (altnode->colour == 0 && altnode->sibling()->colour == 0) {
+			if (altnode->sibling()->bothchildrenblack())
+				altnode->sibling()->colour = 1;
+			goto out;
+		}
+			
+		cout << "SHOULD NEVER GET HERE" << endl;
 		/* FIX ME - balancing code */
 		
 	} else {

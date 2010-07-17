@@ -12,6 +12,8 @@ class redblacknode {
 		redblacknode(const int);
 		redblacknode* grandparent() const;
 		redblacknode* uncle() const;
+		redblacknode* sibling() const;
+		bool bothchildrenblack() const;
 };
 
 class redblacktree {
