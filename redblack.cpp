@@ -262,7 +262,6 @@ bool redblacktree::removenode(int v)
 	redblacknode* altnode = NULL;
 	redblacknode* altlc = NULL;
 	redblacknode* altrc = NULL;
-	int alt = 0;
 	if (located == NULL)
 		return false;
 
@@ -270,131 +269,48 @@ bool redblacktree::removenode(int v)
 	redblacknode* righty =  located->right;
 	if (lefty && righty){
 		altnode = maxleft(located->left);
-		if (altnode->colour == 0) {
+		if (altnode->colour == 0)
 			altnode = minright(located->right);
-			altrc = altnode->right;
-			alt = 2;
 		}
-		else {
-			alt = 1;
-			altlc = altnode->left;
-		}
+		redblacknode* tmp = altnode;
+		located->v = altnode->v;
+		located = altnode;
 	}
 
+	//located is now a node with only one child at most
 	redblacknode* par = located->up;
+	redblacknode* follow = NULL;
+	if (lefty)
+		follow = lefty;
+	else
+		follow = righty;
 
-	//case of two non-leaf children
-	if (altnode) {
-
-		if (par) {
-			if (par->left == located)
-				par->left = altnode;
-			else
-				par->right = altnode;
-		}
+	if (par) {
+		if (par->left == located)
+			par->left = follow;
 		else
-			root = altnode;
+			par->right = follow;
+		}
+	else
+		root = follow;
+	follow->up = par;
 
-		//we know lefty and righty are non-NULL
-		if (alt == 2) {
-			lefty->up = altnode;
-			altnode->left = lefty;
-			if (altnode != righty) {
-				righty->up = altnode;
-				altnode->right = righty;
-			} else
-				altnode->right = NULL;
-		} else {
-			righty->up = altnode;
-			altnode->right = righty;
-			if (altnode != lefty) {
-				altnode->left = lefty;
-				lefty->up = altnode;
-			} else
-				altnode->left = NULL;
-		}
-		//colour the replacement node
-		int colourfix = altnode->colour;
-		altnode->colour = located->colour;
-
-		//fix up the links for the node replacing the deleted node
-		//remembering only left or right children can be non-null
-		redblacknode* altpar = altnode->up;
-		if (altpar != located) {
-			if (altpar->left == altnode)
-				altpar->left = altlc;
-			else
-				altpar->right = altrc;
-		}
-
-		// was just red so no problem
-		if (colourfix == 1)
-			goto out;
-
-		else {  // children are red so just recolour to maintain
-			// black height
-			if (altlc) {
-				if (altlc->colour == 1) {
-					altlc->colour = 0;
-					goto out;
-				}
-			}
-			else {
-				if (altrc->colour == 1) {
-					altrc->colour = 0;
-					goto out;
-				}
-			}
-		}
-
-		// new node and sibling both black, so cut black height by one
-		// on both sides - if children are black
-		if (altnode->colour == 0 && altnode->sibling()->colour == 0) {
-			if (altnode->sibling()->bothchildrenblack())
-				altnode->sibling()->colour = 1;
-			goto out;
-		}
-			
-		cout << "SHOULD NEVER GET HERE" << endl;
-		/* FIX ME - balancing code */
-		
-	} else {
-		if (lefty) {
-			lefty->up = par;
-			if (par) {
-				if (par->left == located)
-					par->left = lefty;
-				else
-					par->right = lefty;
-			}
-			else
-				root = lefty;
-		}
-		else if (righty) {
-			righty->up = par;
-			if (par) {
-				if (par->right == located)
-					par->right = righty;
-				else
-					par->left = righty;
-			}
-			else
-				root = righty;
-		} else {
-			if (par) {
-				if (par->right == located)
-					par->right = NULL;
-				else
-					par->left = NULL;
-			}
-			else
-				root = NULL;
-		}
+	//easy to remove a red
+	if (located->colour == 1) {
+		delete located;
+		return true;
 	}
 
-out:
-	delete located;
-	located = NULL;
-	return true;
-}
+	//also easy if follow is red
+	if (follow->colour == 1) {
+		follow->colour = 0;
+		delete located;
+		return true;
+	}
 
+	redblacknode* sibling = follow->sibling();
+	//test sibling status
+	if (sibling) {
+		//black?
+		if (sibling->colour == 0) {
+			
