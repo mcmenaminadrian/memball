@@ -281,7 +281,7 @@ redblacknode* redblacktree::locatenode(int v, redblacknode* node)
 }
 
 redblacknode* redblacktree::minright(redblacknode* node)
-{cout << "testing right at " << node->value << endl;
+{
 
 	if (node->left)
 		minright(node->left);
@@ -290,7 +290,7 @@ redblacknode* redblacktree::minright(redblacknode* node)
 }
 
 redblacknode* redblacktree::maxleft(redblacknode* node)
-{	cout << "testing at " << node->value << endl;
+{
 	if (node->right)
 		maxleft(node->right);
 	else
@@ -412,9 +412,9 @@ void streamrbt(ostream& os, redblacknode* node)
 	else
 		os << "[RED]";
 	streamrbt(os, node->left);
-	os << "),";
+	cout << ",";
 	streamrbt(os, node->right);
-	os << ") ";
+	os << ")";
 }
 	
 

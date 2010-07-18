@@ -53,9 +53,6 @@ int main()
 	while (proc_details = readproc(ptab, NULL))
 	{
 		if (proc_details->resident) {
-//			process* addp = new process();
-//			addp->set_reserve_pages(proc_details->resident);
-//			proctree.insert_process(addp);
 			int x = proc_details->resident;
 			redblacknode* tmp = proctree->root;
 			proctree->insertnode(x, tmp);
@@ -64,7 +61,6 @@ int main()
 
 	closeproc(ptab);
 //	proctree.show_in_order(proctree.root);
-	show_preorder(proctree->root);
 	redblacknode* top = proctree->root;
 	redblacknode* nextl = top->left;
 	redblacknode* nextr = top->right;
@@ -73,19 +69,16 @@ int main()
 
 	cout << endl << "Killing root"<< endl;
 	proctree->removenode(top->value);
-	show_preorder(proctree->root);
 
 	cout << endl << proctree << endl;
 
 	cout << endl << "Kill left" << endl;
 	proctree->removenode(nextl->value);
-	show_preorder(proctree->root);
 
 	cout << endl << proctree << endl;
 
 	cout << endl << "Kill right" << endl;
 	proctree->removenode(nextr->value);
-	show_preorder(proctree->root);
 
 	cout << endl << proctree << endl;
 
