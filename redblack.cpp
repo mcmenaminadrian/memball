@@ -198,8 +198,8 @@ void redblacktree::transform2(redblacknode* node)
 	redblacknode* sibling = node->sibling();
 	int oldcolour = sibling->colour;
 	
-	if (follow->up->left == follow)
-		rotate2(sibling->right)
+	if (node->up->left == node)
+		rotate2(sibling->right);
 	else
 		rotate2(sibling->left);
 	sibling->colour = oldcolour;
@@ -301,8 +301,6 @@ bool redblacktree::removenode(int v)
 {
 	redblacknode* located = locatenode(v, root);
 	redblacknode* altnode = NULL;
-	redblacknode* altlc = NULL;
-	redblacknode* altrc = NULL;
 	if (located == NULL)
 		return false;
 
@@ -312,9 +310,7 @@ bool redblacktree::removenode(int v)
 		altnode = maxleft(located->left);
 		if (altnode->colour == 0)
 			altnode = minright(located->right);
-		}
-		redblacknode* tmp = altnode;
-		located->v = altnode->v;
+		located->value = altnode->value;
 		located = altnode;
 	}
 
@@ -361,14 +357,14 @@ bool redblacktree::removenode(int v)
 			}
 			//case above can fall directly into case below
 			if (follow->up->colour == 1) {
-				if (bothchildrenblack(sibling)) {
+				if (sibling->bothchildrenblack()) {
 					sibling->colour = 1;
 					follow->up->colour = 0;
 					delete located;
 					return true;
 				}
 			}
-			if (bothchildrenblack(sibling)){
+			if (sibling->bothchildrenblack()){
 				sibling->colour = 1;
 				follow = follow->up;
 				continue;
@@ -379,7 +375,7 @@ bool redblacktree::removenode(int v)
 					sibling->right->colour == 0)
 					transform1(sibling);
 				else {
-					transform2(follow)
+					transform2(follow);
 					delete located;
 					return true;
 				}
