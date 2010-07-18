@@ -164,6 +164,47 @@ void redblacktree::rotate1(redblacknode* node)
 	}
 }
 
+void redblacktree::transform1(redblacknode* node)
+{
+	redblacknode* par = node->up;
+	redblacknode* lefty = node->left;
+	redblacknode* righty = node->right;
+	if (lefty && lefty->colour == 1) {
+		par->right = lefty;
+		lefty->colour = 0;
+		lefty->up = par;
+		node->left = lefty->right;
+		if (node->left)
+			node->left->up = node;
+		lefty->right = node;
+		node->up = lefty;
+		node->colour = 1;
+	}
+	else if (righty && righty->colour == 1) {
+		par->left = righty;
+		righty->colour = 0;
+		righty->up = par;
+		node->right = righty->left;
+		if (node->right)
+			node->right->up = node;
+		righty->left = node;
+		node->up = righty;
+		node->colour = 1;
+	}
+}
+
+void redblacktree::transform2(redblacknode* node)
+{
+	redblacknode* sibling = node->sibling();
+	int oldcolour = sibling->colour;
+	
+	if (follow->up->left == follow)
+		rotate2(sibling->right)
+	else
+		rotate2(sibling->left);
+	sibling->colour = oldcolour;
+}
+
 void redblacktree::balanceinsert(redblacknode* node)
 {
 	if (node->up) {
@@ -308,9 +349,55 @@ bool redblacktree::removenode(int v)
 		return true;
 	}
 
-	redblacknode* sibling = follow->sibling();
-	//test sibling status
-	if (sibling) {
-		//black?
-		if (sibling->colour == 0) {
-			
+	//loop through the fixes
+	do {
+		redblacknode* sibling = follow->sibling();
+		//test sibling status
+		if (sibling) {
+			//red?
+			if (sibling->colour == 1) {
+				rotate2(sibling);
+				sibling = follow->sibling();
+			}
+			//case above can fall directly into case below
+			if (follow->up->colour == 1) {
+				if (bothchildrenblack(sibling)) {
+					sibling->colour = 1;
+					follow->up->colour = 0;
+					delete located;
+					return true;
+				}
+			}
+			if (bothchildrenblack(sibling)){
+				sibling->colour = 1;
+				follow = follow->up;
+				continue;
+			}
+			if (follow->up->right == sibling) {
+				if (sibling->left &&
+					sibling->left->colour == 1 &&
+					sibling->right->colour == 0)
+					transform1(sibling);
+				else {
+					transform2(follow)
+					delete located;
+					return true;
+				}
+			}		
+			else if (follow->up->left == sibling) {
+				if (sibling->right &&
+					sibling->right->colour == 1 &&
+					sibling->left->colour == 0)
+					transform1(sibling);
+				else {
+					transform2(follow);
+					delete located;
+					return true;
+				}
+			}
+		} else {
+			delete located;
+			return true;
+		}
+	}while(true);
+}			

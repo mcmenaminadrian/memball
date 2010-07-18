@@ -28,6 +28,8 @@ class redblacktree {
 		void balanceinsert(redblacknode*);
 		void rotate2(redblacknode*);
 		void rotate1(redblacknode*);
+		void transform1(redblacknode*);
+		void transform2(redblacknode*);
 		void free(redblacknode*);
 		redblacknode* maxleft(redblacknode*);
 		redblacknode* minright(redblacknode*);
