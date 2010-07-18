@@ -1,6 +1,8 @@
 #ifndef __REDBLACKTREE__
 #define __REDBLACKTREE__
 
+using namespace std;
+
 class redblacknode {
 
 	public:
@@ -17,6 +19,8 @@ class redblacknode {
 };
 
 class redblacktree {
+	friend ostream& operator<<(ostream& os, const redblacktree& rbt);
+	friend ostream& operator<<(ostream& os, redblacktree* rbtp);
 	public:
 		redblacknode* root;
 		void insertnode(int, redblacknode*, int d = 1);

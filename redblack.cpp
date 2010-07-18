@@ -312,6 +312,8 @@ bool redblacktree::removenode(int v)
 			altnode = minright(located->right);
 		located->value = altnode->value;
 		located = altnode;
+		lefty = located->left;
+		righty = located->right;
 	}
 
 	//located is now a node with only one child at most
@@ -330,7 +332,9 @@ bool redblacktree::removenode(int v)
 		}
 	else
 		root = follow;
-	follow->up = par;
+	
+	if (follow)
+		follow->up = par;
 
 	//easy to remove a red
 	if (located->colour == 1) {
@@ -396,4 +400,32 @@ bool redblacktree::removenode(int v)
 			return true;
 		}
 	}while(true);
-}			
+}
+
+void streamrbt(ostream& os, redblacknode* node)
+{
+	if (node == NULL) 
+		return;
+	os << "(" << node->value;
+	if (node->colour == 0)
+		os << "[BLACK]";
+	else
+		os << "[RED]";
+	streamrbt(os, node->left);
+	os << "),";
+	streamrbt(os, node->right);
+	os << ") ";
+}
+	
+
+ostream& operator<<(ostream& os, const redblacktree& rbt)
+{
+	streamrbt(os, rbt.root);
+	return os;
+}
+
+ostream& operator<<(ostream& os, redblacktree* rbt)
+{
+	streamrbt(os, rbt->root);
+	return os;
+}		
