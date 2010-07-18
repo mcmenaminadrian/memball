@@ -19,8 +19,6 @@ class redblacknode {
 };
 
 class redblacktree {
-	friend ostream& operator<<(ostream& os, const redblacktree& rbt);
-	friend ostream& operator<<(ostream& os, redblacktree* rbtp);
 	public:
 		redblacknode* root;
 		void insertnode(int, redblacknode*, int d = 1);
@@ -39,5 +37,8 @@ class redblacktree {
 		redblacknode* minright(redblacknode*);
 		redblacknode* locatenode(int, redblacknode*);
 };
+
+ostream& operator<<(ostream& os, const redblacktree& rbt);
+ostream& operator<<(ostream& os, redblacktree* rbtp);
 
 #endif

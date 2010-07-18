@@ -27,133 +27,6 @@ class process
 		int get_virt(){ return virt_pages;}
 };
 
-class node
-{
-
-	private:
-		process* proc;
-
-	public:
-		node* left;
-		node* right;
-		int reserve(){return proc->get_reserved();}
-		int shared(){return proc->get_shared();}
-		int virt(){return proc->get_virt();}
-		node(process* p = NULL) { proc = p; left= NULL; right = NULL;}
-		~node(){delete proc;}
-};
-
-class simpletree
-{
-	public:
-		node* root;
-		void insert_process(process* p);
-		void insert_process_reserve(process* p, node*& n);
-		void insert_process_shared(process* p, node*& n );
-		void insert_process_virt(process* p, node*& n);
-		simpletree(){root = NULL;}
-		~simpletree();
-		void show_in_order(node* n);
-	private:
-		void free(node*& n);
-};		
-
-void simpletree::show_in_order(node* n)
-{
-	if (!n)
-		return;
-	show_in_order(n->left);
-	cout << n->reserve() << endl;
-	show_in_order(n->right);
-}
-		
-simpletree::~simpletree()
-{
-	free(root);
-}
-
-void simpletree::free(node*& n)
-{
-	if (!n) return;
-	free(n->left);
-	free(n->right);
-	delete n;
-	n = NULL;
-}
-
-void simpletree::insert_process(process* p)
-{
-	insert_process_reserve(p, root);
-}
-
-void simpletree::insert_process_reserve(process* p, node*& n)
-{
-	if (!n) {
-		root = new node(p);
-		return;
-	}
-
-	if (p->get_reserved() < n->reserve()) {
-		if (n->left == NULL) {
-			n->left = new node(p);
-			return;
-		}
-		insert_process_reserve(p, n->left);
-	}
-	else {
-		if (n->right == NULL) {
-			n->right = new node(p);
-			return;
-		}
-		insert_process_reserve(p, n->right);
-	}
-}
-
-void simpletree::insert_process_shared(process* p, node*& n)
-{
-	if (!n) {
-		root = new node(p);
-		return;
-	}
-
-	if (p->get_shared() < n->shared()) {
-		if (n->left == NULL) {
-			n->left = new node(p);
-			return;
-		}
-		insert_process_shared(p, n->left);
-	}
-	else {
-		if (n->right == NULL) {
-			n->right = new node(p);
-			return;
-		}
-		insert_process_shared(p, n->right);
-	}
-}
-
-void simpletree::insert_process_virt(process* p, node*& n)
-{
-	if (!n) {
-		root = new node(p);
-		return;
-	}
-
-	if (p->get_virt() < n->virt()) {
-		if (n->left == NULL) {
-			n->left = new node(p);
-			return;
-		}
-		insert_process_virt(p, n->left);
-	}
-	else {
-		if (n->right == NULL) {
-			n->right = new node(p);
-			return;
-		}
-		insert_process_virt(p, n->right);
-	}
-}
 
 void show_preorder(redblacknode* node)
 {
@@ -196,19 +69,27 @@ int main()
 	redblacknode* nextl = top->left;
 	redblacknode* nextr = top->right;
 
+	cout << endl << proctree << endl;
+
 	cout << endl << "Killing root"<< endl;
 	proctree->removenode(top->value);
 	show_preorder(proctree->root);
+
+	cout << endl << proctree << endl;
 
 	cout << endl << "Kill left" << endl;
 	proctree->removenode(nextl->value);
 	show_preorder(proctree->root);
 
+	cout << endl << proctree << endl;
+
 	cout << endl << "Kill right" << endl;
 	proctree->removenode(nextr->value);
 	show_preorder(proctree->root);
 
-	cout << endl;	
+	cout << endl << proctree << endl;
+
+	cout << endl;
 	delete proctree;	
 
 	return 1;
