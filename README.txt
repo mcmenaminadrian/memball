@@ -1,4 +1,4 @@
-This project aims to produce a system tool (for Linux and maybe oter Unices)
+This project aims to produce a system tool (for Linux and maybe other Unices)
 which allows the process table to be examined in the form of a Red Black
 Tree.
 
