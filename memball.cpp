@@ -28,11 +28,11 @@ class process
 };
 
 
-void show_preorder(redblacknode* node)
+template <typename R> void show_preorder(R* node)
 {
 	if (node == NULL)
 		return;
-	cout << node->value << ",";
+	cout << node << ",";
 	if (node->colour == 0)
 		cout << "BLACK";
 	else
@@ -45,7 +45,8 @@ void show_preorder(redblacknode* node)
 int main()
 {
 	pagesize = getpagesize();
-	redblacktree* proctree = new redblacktree();
+	redblacktree< redblacknode<int> >* proctree;
+	proctree = new redblacktree<redblacknode<int> >();
 
 	PROCTAB* ptab = openproc(PROC_FILLMEM);
 	proc_t* proc_details;
@@ -53,32 +54,34 @@ int main()
 	while (proc_details = readproc(ptab, NULL))
 	{
 		if (proc_details->resident) {
-			int x = proc_details->resident;
-			redblacknode* tmp = proctree->root;
-			proctree->insertnode(x, tmp);
+			redblacknode<int>* x = new redblacknode<int>(proc_details->resident);
+			proctree->insertnode(x, proctree->root);
 		}
 	}
 
 	closeproc(ptab);
-//	proctree.show_in_order(proctree.root);
-	redblacknode* top = proctree->root;
-	redblacknode* nextl = top->left;
-	redblacknode* nextr = top->right;
+	//proctree.show_in_order(proctree.root);
+	redblacknode<int>* top = proctree->root;
+	redblacknode<int>* nextl = top->left;
+	redblacknode<int>* nextr = top->right;
 
 	cout << endl << proctree << endl;
 
-	cout << endl << "Killing root"<< endl;
-	proctree->removenode(top->value);
+//	cout << endl << "Killing root"<< endl;
+	redblacknode<int> topper(top->value);
+	proctree->removenode(topper);
 
 	cout << endl << proctree << endl;
 
-	cout << endl << "Kill left" << endl;
-	proctree->removenode(nextl->value);
+//	cout << endl << "Kill left" << endl;
+	redblacknode<int> m(nextl->value);
+	proctree->removenode(m);
 
 	cout << endl << proctree << endl;
 
-	cout << endl << "Kill right" << endl;
-	proctree->removenode(nextr->value);
+//	cout << endl << "Kill right" << endl;
+	redblacknode<int> k(nextr->value);
+	proctree->removenode(k);
 
 	cout << endl << proctree << endl;
 

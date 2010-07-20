@@ -3,42 +3,50 @@
 
 using namespace std;
 
-class redblacknode {
+
+
+template <typename T>
+class redblacknode{
+
+template <typename Z> friend ostream& operator<<(ostream& os, const redblacknode<Z>& rbt);
+template <typename Z> friend ostream& operator<<(ostream& os, redblacknode<Z>* rbtp);
 
 	public:
+		T value;
 		int colour;
-		int value;
 		redblacknode* up;
 		redblacknode* left;
 		redblacknode* right;
-		redblacknode(const int);
+		redblacknode(const T& v);
 		redblacknode* grandparent() const;
-		redblacknode* uncle() const;
+ 		redblacknode* uncle() const;
 		redblacknode* sibling() const;
 		bool bothchildrenblack() const;
+		bool equals(redblacknode*) const;
+		bool lessthan(redblacknode*) const;
+		void assign(redblacknode*);
 };
 
+template <typename NODE>
 class redblacktree {
 	public:
-		redblacknode* root;
-		void insertnode(int, redblacknode*, int d = 1);
-		bool removenode(int);
+		NODE* root;
+		void insertnode(NODE*, NODE*, int d = 1);
+		bool removenode(NODE&);
 		redblacktree();
 		~redblacktree();
 	private:
 		int depth; //helps with drawing
-		void balanceinsert(redblacknode*);
-		void rotate2(redblacknode*);
-		void rotate1(redblacknode*);
-		void transform1(redblacknode*);
-		void transform2(redblacknode*);
-		void free(redblacknode*);
-		redblacknode* maxleft(redblacknode*);
-		redblacknode* minright(redblacknode*);
-		redblacknode* locatenode(int, redblacknode*);
+		void balanceinsert(NODE*);
+		void rotate2(NODE*);
+		void rotate1(NODE*);
+		void transform1(NODE*);
+		void transform2(NODE*);
+		void free(NODE*);
+		NODE* maxleft(NODE*);
+		NODE* minright(NODE*);
+		NODE* locatenode(NODE*, NODE*);
 };
 
-ostream& operator<<(ostream& os, const redblacktree& rbt);
-ostream& operator<<(ostream& os, redblacktree* rbtp);
 
 #endif

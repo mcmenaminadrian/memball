@@ -7,7 +7,27 @@ using namespace std;
 // Licensed under the GNU GPL version 2
 // or any later version at your discretion
 
-redblacknode* redblacknode::grandparent() const
+template <typename T> redblacknode<T>::redblacknode(const T& v)
+{
+	colour = 1; //red
+	value = v;
+	up = NULL;
+	left = NULL;
+	right = NULL;
+}
+
+template <typename T> redblacknode<T>* redblacknode<T>::sibling() const
+{
+	if (!up)
+		return NULL;
+	if (up->left == this)
+		return up->right;
+	else
+		return up->left;
+}
+
+
+template <typename T> redblacknode<T>* redblacknode<T>::grandparent() const
 {
 	if (up)
 		return up->up;
@@ -15,7 +35,7 @@ redblacknode* redblacknode::grandparent() const
 		return NULL;
 }
 
-redblacknode* redblacknode::uncle() const
+template <typename T> redblacknode<T>* redblacknode<T>::uncle() const
 {
 	redblacknode* g = grandparent();
 	if (g) {
@@ -27,17 +47,7 @@ redblacknode* redblacknode::uncle() const
 	return NULL;
 }
 
-redblacknode* redblacknode::sibling() const
-{
-	if (!up)
-		return NULL;
-	if (up->left == this)
-		return up->right;
-	else
-		return up->left;
-}
-
-bool redblacknode::bothchildrenblack() const
+template <typename T> bool redblacknode<T>::bothchildrenblack() const
 {
 	if (right && right->colour == 1)
 		return false;
@@ -46,45 +56,55 @@ bool redblacknode::bothchildrenblack() const
 	return true;
 }
 
-redblacknode::redblacknode(const int v)
+template <typename T> bool redblacknode<T>::equals(redblacknode* rbn) const
 {
-	colour = 1; //red
-	value = v;
-	up = NULL;
-	left = NULL;
-	right = NULL;
+	if (value == rbn->value)
+		return true;
+	return false;
 }
 
-redblacktree::~redblacktree()
+template <typename T> bool redblacknode<T>::lessthan(redblacknode* rbn) const
+{
+	if (value < rbn->value)
+		return true;
+	return false;
+}
+
+template <typename T> void redblacknode<T>::assign(redblacknode<T>* v)
+{
+	value = v->value;
+}
+
+template <typename NODE> redblacktree<NODE>::~redblacktree()
 {
 	free(root);
 }
 
-void redblacktree::free(redblacknode* v)
+template <typename NODE> void redblacktree<NODE>::free(NODE* v)
 {
 	if (v == NULL)
 		return;
 	free(v->left);
-	redblacknode* tmp = v->right;
+	NODE* tmp = v->right;
 	delete v;
 	free(tmp);
 }
 
-redblacktree::redblacktree()
+template <typename NODE> redblacktree<NODE>::redblacktree()
 {
 	root = NULL;
 	depth = 0;
 }
 
 // turn line of two reds and a black into black with two children
-void redblacktree::rotate2(redblacknode* node)
+template <typename NODE> void redblacktree<NODE>::rotate2(NODE* node)
 {
 	if (!node || !node->up)
 		return;
-	redblacknode* gp = node->grandparent();
-	redblacknode* par = NULL;
+	NODE* gp = node->grandparent();
+	NODE* par = NULL;
 	
-	redblacknode* centrenode = node->up;
+	NODE* centrenode = node->up;
 	if (gp) {
 		par = gp->up;
 		if (par) {
@@ -97,7 +117,7 @@ void redblacktree::rotate2(redblacknode* node)
 	
 	if (node->up->right == node)
 	{
-		redblacknode* centreleft = centrenode->left;
+		NODE* centreleft = centrenode->left;
 		centrenode->colour = 0;
 		centrenode->left = gp;
 		if (gp) {
@@ -108,7 +128,7 @@ void redblacktree::rotate2(redblacknode* node)
 				centreleft->up = gp;
 		}
 	} else {
-		redblacknode* centreright = centrenode->right;
+		NODE* centreright = centrenode->right;
 		centrenode->colour = 0;
 		centrenode->right = gp;
 		if (gp) {
@@ -122,20 +142,18 @@ void redblacktree::rotate2(redblacknode* node)
 	centrenode->up = par;
 	if (!par)
 		root = centrenode;
-
-
 }
 
 //straighten zig zag of two reds
-void redblacktree::rotate1(redblacknode* node)
+template <typename NODE> void redblacktree<NODE>::rotate1(NODE* node)
 {
 	if (!node)
 		return;
-	redblacknode* par = node->up;
-	redblacknode* rightnode = node->right;
-	redblacknode* leftnode = node->left;
-	redblacknode* rightleft = NULL;
-	redblacknode* leftright = NULL;
+	NODE* par = node->up;
+	NODE* rightnode = node->right;
+	NODE* leftnode = node->left;
+	NODE* rightleft = NULL;
+	NODE* leftright = NULL;
 
 	if (par) {
 		if (par->left == node) {
@@ -164,11 +182,11 @@ void redblacktree::rotate1(redblacknode* node)
 	}
 }
 
-void redblacktree::transform1(redblacknode* node)
+template <typename NODE> void redblacktree<NODE>::transform1(NODE* node)
 {
-	redblacknode* par = node->up;
-	redblacknode* lefty = node->left;
-	redblacknode* righty = node->right;
+	NODE* par = node->up;
+	NODE* lefty = node->left;
+	NODE* righty = node->right;
 	if (lefty && lefty->colour == 1) {
 		par->right = lefty;
 		lefty->colour = 0;
@@ -193,9 +211,9 @@ void redblacktree::transform1(redblacknode* node)
 	}
 }
 
-void redblacktree::transform2(redblacknode* node)
+template <typename NODE> void redblacktree<NODE>::transform2(NODE* node)
 {
-	redblacknode* sibling = node->sibling();
+	NODE* sibling = node->sibling();
 	int oldcolour = sibling->colour;
 	
 	if (node->up->left == node)
@@ -205,7 +223,7 @@ void redblacktree::transform2(redblacknode* node)
 	sibling->colour = oldcolour;
 }
 
-void redblacktree::balanceinsert(redblacknode* node)
+template <typename NODE> void redblacktree<NODE>::balanceinsert(NODE* node)
 {
 	if (node->up) {
 		if (node->up->colour == 0) {
@@ -239,48 +257,49 @@ void redblacktree::balanceinsert(redblacknode* node)
 
 }
 
-void redblacktree::insertnode(int v, redblacknode* node, int deep)
+template <typename NODE> void redblacktree<NODE>::insertnode(NODE* insert,
+							NODE* node, int deep)
 {
 	if (node == NULL) {
-		root = new redblacknode(v);
+		root = insert;
 		root->colour = 0;
 		depth = deep;
 		return;
 	}
-	if (v < node->value) { 
+	if (insert < node) { 
 		if (node->left == NULL) {
-			node->left = new redblacknode(v);
+			node->left = insert;
 			node->left->up = node;
 			node = node->left;
 			balanceinsert(node);
 			if (depth < deep) depth = deep;
 		} else 
-			insertnode(v, node->left, ++deep);
+			insertnode(insert, node->left, ++deep);
 	} else {
 		if (node->right == NULL) {
-			node->right = new redblacknode(v);
+			node->right = insert;
 			node->right->up = node;
 			node = node->right;
 			balanceinsert(node);
 			if (depth < deep) depth = deep;
 		} else
-			insertnode(v, node->right, ++deep);
+			insertnode(insert, node->right, ++deep);
 	}
 }
 
-redblacknode* redblacktree::locatenode(int v, redblacknode* node)
+template <typename NODE> NODE* redblacktree<NODE>::locatenode(NODE* v, NODE* node)
 {
 	if (node == NULL)
 		return node;
-	if (v == node->value)
+	if (v->equals(node))
 		return node;
-	if (v < node->value)
+	if (v->lessthan(node))
 		locatenode(v, node->left);
 	else
 		locatenode(v, node->right);
 }
 
-redblacknode* redblacktree::minright(redblacknode* node)
+template <typename NODE> NODE* redblacktree<NODE>::minright(NODE* node)
 {
 
 	if (node->left)
@@ -289,7 +308,7 @@ redblacknode* redblacktree::minright(redblacknode* node)
 		return node;
 }
 
-redblacknode* redblacktree::maxleft(redblacknode* node)
+template <typename NODE> NODE* redblacktree<NODE>::maxleft(NODE* node)
 {
 	if (node->right)
 		maxleft(node->right);
@@ -297,28 +316,28 @@ redblacknode* redblacktree::maxleft(redblacknode* node)
 		return node;
 }
 
-bool redblacktree::removenode(int v)
+template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 {
-	redblacknode* located = locatenode(v, root);
-	redblacknode* altnode = NULL;
+	NODE* located = locatenode(&v, root);
+	NODE* altnode = NULL;
 	if (located == NULL)
 		return false;
 
-	redblacknode* lefty = located->left;
-	redblacknode* righty =  located->right;
+	NODE* lefty = located->left;
+	NODE* righty =  located->right;
 	if (lefty && righty){
 		altnode = maxleft(located->left);
 		if (altnode->colour == 0)
 			altnode = minright(located->right);
-		located->value = altnode->value;
+		located->assign(altnode);
 		located = altnode;
 		lefty = located->left;
 		righty = located->right;
 	}
 
 	//located is now a node with only one child at most
-	redblacknode* par = located->up;
-	redblacknode* follow = NULL;
+	NODE* par = located->up;
+	NODE* follow = NULL;
 	if (lefty)
 		follow = lefty;
 	else
@@ -351,7 +370,7 @@ bool redblacktree::removenode(int v)
 
 	//loop through the fixes
 	do {
-		redblacknode* sibling = follow->sibling();
+		NODE* sibling = follow->sibling();
 		//test sibling status
 		if (sibling) {
 			//red?
@@ -402,7 +421,7 @@ bool redblacktree::removenode(int v)
 	}while(true);
 }
 
-void streamrbt(ostream& os, redblacknode* node)
+template <typename RBN> void streamrbt(ostream& os, RBN* node)
 {
 	if (node == NULL) 
 		return;
@@ -418,13 +437,13 @@ void streamrbt(ostream& os, redblacknode* node)
 }
 	
 
-ostream& operator<<(ostream& os, const redblacktree& rbt)
+template <typename T> ostream& operator<<(ostream& os, const redblacknode<T> rbt)
 {
 	streamrbt(os, rbt.root);
 	return os;
 }
 
-ostream& operator<<(ostream& os, redblacktree* rbt)
+template <typename T> ostream& operator<<(ostream& os, redblacknode<T>* rbt)
 {
 	streamrbt(os, rbt->root);
 	return os;
