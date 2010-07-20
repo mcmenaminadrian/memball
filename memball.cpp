@@ -50,7 +50,7 @@ int main()
 
 	PROCTAB* ptab = openproc(PROC_FILLMEM);
 	proc_t* proc_details;
-	
+
 	while (proc_details = readproc(ptab, NULL))
 	{
 		if (proc_details->resident) {
@@ -60,30 +60,10 @@ int main()
 	}
 
 	closeproc(ptab);
-	//proctree.show_in_order(proctree.root);
+//	proctree.show_in_order(proctree->root);
 	redblacknode<int>* top = proctree->root;
-	redblacknode<int>* nextl = top->left;
-	redblacknode<int>* nextr = top->right;
 
-	cout << endl << proctree << endl;
-
-//	cout << endl << "Killing root"<< endl;
-	redblacknode<int> topper(top->value);
-	proctree->removenode(topper);
-
-	cout << endl << proctree << endl;
-
-//	cout << endl << "Kill left" << endl;
-	redblacknode<int> m(nextl->value);
-	proctree->removenode(m);
-
-	cout << endl << proctree << endl;
-
-//	cout << endl << "Kill right" << endl;
-	redblacknode<int> k(nextr->value);
-	proctree->removenode(k);
-
-	cout << endl << proctree << endl;
+	cout << endl << top << endl;
 
 	cout << endl;
 	delete proctree;	
