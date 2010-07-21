@@ -60,12 +60,16 @@ int main()
 	}
 
 	closeproc(ptab);
-//	proctree.show_in_order(proctree->root);
 	redblacknode<int>* top = proctree->root;
+	do {
+		proctree->root->showinorder(proctree->root);
+		cout << endl << endl << proctree->root << endl;
+		redblacknode<int> t(proctree->min());
+		cout << "deleting minimum" << endl;
+		proctree->removenode(t);
+	} while (proctree->root);
+	
 
-	cout << endl << top << endl;
-
-	cout << endl;
 	delete proctree;	
 
 	return 1;

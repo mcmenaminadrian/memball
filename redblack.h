@@ -25,6 +25,8 @@ class redblacknode{
 		redblacknode* left;
 		redblacknode* right;
 		redblacknode(const T& v);
+		redblacknode(redblacknode* node);
+		redblacknode(redblacknode& node);
 		redblacknode* grandparent() const;
  		redblacknode* uncle() const;
 		redblacknode* sibling() const;
@@ -32,20 +34,18 @@ class redblacknode{
 		bool equals(redblacknode*) const;
 		bool lessthan(redblacknode*) const;
 		void assign(redblacknode*);
+		void showinorder(redblacknode*) const;
+		void showpreorder(redblacknode*) const;
+		void showpostorder(redblacknode*) const;
 };
 
 template <typename NODE>
 class redblacktree {
-	public:
-		NODE* root;
-		void insertnode(NODE*, NODE*, int d = 1);
-		bool removenode(NODE&);
-		redblacktree();
-		~redblacktree();
 	private:
 		int depth; //helps with drawing
 		void balanceinsert(NODE*);
 		void rotate2(NODE*);
+		void rotate2a(NODE*);
 		void rotate1(NODE*);
 		void transform1(NODE*);
 		void transform2(NODE*);
@@ -53,15 +53,67 @@ class redblacktree {
 		NODE* maxleft(NODE*);
 		NODE* minright(NODE*);
 		NODE* locatenode(NODE*, NODE*);
+	public:
+		NODE* root;
+		void insertnode(NODE*, NODE*, int d = 1);
+		bool removenode(NODE&);
+		NODE* min() const;
+		NODE* max() const;
+		redblacktree();
+		~redblacktree();
 };
 
 
+template <typename T> void redblacknode<T>::showinorder(redblacknode<T>* node) const
+{
+	if (node == NULL)
+		return;
+	showinorder(node->left);
+	cout << node->value << ", ";
+	showinorder(node->right);
+}
+
+template <typename T> void redblacknode<T>::showpreorder(redblacknode<T>* node) const
+{
+	if (node == NULL)
+		return;
+	cout << node->value << ", ";
+	showinorder(node->left);
+	showinorder(node->right);
+}
+
+template <typename T> void redblacknode<T>::showpostorder(redblacknode<T>* node) const
+{
+	if (node == NULL)
+		return;
+	showinorder(node->left);
+	showinorder(node->right);
+	cout << node->value << ", ";
+}
 
 
 template <typename T> redblacknode<T>::redblacknode(const T& v)
 {
 	colour = 1; //red
 	value = v;
+	up = NULL;
+	left = NULL;
+	right = NULL;
+}
+
+template <typename T> redblacknode<T>::redblacknode(redblacknode* node)
+{
+	colour = node->colour;
+	value = node->value;
+	up = NULL;
+	left = NULL;
+	right = NULL;
+}
+
+template <typename T> redblacknode<T>::redblacknode(redblacknode& node)
+{
+	colour = node.colour;
+	value = node.value;
 	up = NULL;
 	left = NULL;
 	right = NULL;
@@ -195,6 +247,48 @@ template <typename NODE> void redblacktree<NODE>::rotate2(NODE* node)
 		root = centrenode;
 }
 
+template <typename NODE> void redblacktree<NODE>::rotate2a(NODE* node)
+{
+	if (!node || !node->up)
+		return;
+	NODE* par = node->up;
+	NODE* gp = node->grandparent();
+	NODE* righty = node->right;
+	NODE* lefty = node->left;
+	if (gp) {
+		if (gp->left == par)
+			gp->left = node;
+		else
+			gp->right = node;
+		node->up = gp;
+	} else {
+		root = node;
+		node->up = NULL;
+	}
+
+	if (par->right == node) {
+		int oldcol = par->colour;
+		node->left = par;
+		par->up = node;
+		par->right = lefty;
+		if (lefty)
+			lefty->up = par;
+		if (righty)
+			righty->colour = 0;
+		par->colour = 0;
+		node->colour = oldcol;
+
+	} else {
+		node->right = par;
+		par->up = node;
+		par->left = righty;
+		if (righty)
+			righty->up = par;
+		node->colour = 0;
+		par->colour = 1;
+	}
+}	
+
 //straighten zig zag of two reds
 template <typename NODE> void redblacktree<NODE>::rotate1(NODE* node)
 {
@@ -263,14 +357,14 @@ template <typename NODE> void redblacktree<NODE>::transform1(NODE* node)
 }
 
 template <typename NODE> void redblacktree<NODE>::transform2(NODE* node)
-{
+{ cout << "HERE" << endl;
 	NODE* sibling = node->sibling();
 	int oldcolour = sibling->colour;
 	
 	if (node->up->left == node)
-		rotate2(sibling->right);
+		rotate2a(sibling->right);
 	else
-		rotate2(sibling->left);
+		rotate2a(sibling->left);
 	sibling->colour = oldcolour;
 }
 
@@ -359,6 +453,30 @@ template <typename NODE> NODE* redblacktree<NODE>::minright(NODE* node)
 		return node;
 }
 
+template <typename NODE> NODE* redblacktree<NODE>::min() const
+{
+	if (!root)
+		return NULL;
+	NODE* p = root;
+	do {
+		if (!p->left)
+			return p;
+		p = p->left;
+	} while(true);
+}
+
+template <typename NODE> NODE* redblacktree<NODE>::max() const
+{
+	if (!root)
+		return NULL;
+	NODE* p = root;
+	do {
+		if (!p->right)
+			return p;
+		p = p->right;
+	} while(true);
+}
+
 template <typename NODE> NODE* redblacktree<NODE>::maxleft(NODE* node)
 {
 	if (node->right)
@@ -388,6 +506,7 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 
 	//located is now a node with only one child at most
 	NODE* par = located->up;
+	NODE* sibling = NULL;
 	NODE* follow = NULL;
 	if (lefty)
 		follow = lefty;
@@ -395,11 +514,15 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 		follow = righty;
 
 	if (par) {
-		if (par->left == located)
+		if (par->left == located) {
 			par->left = follow;
-		else
-			par->right = follow;
+			sibling = par->right;
 		}
+		else {
+			par->right = follow;
+			sibling = par->left;
+		}
+	}
 	else
 		root = follow;
 	
@@ -413,7 +536,7 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 	}
 
 	//also easy if follow is red
-	if (follow->colour == 1) {
+	if (follow && follow->colour == 1) {
 		follow->colour = 0;
 		delete located;
 		return true;
@@ -421,16 +544,17 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 
 	//loop through the fixes
 	do {
-		NODE* sibling = follow->sibling();
 		//test sibling status
-		if (sibling) {
+		if (sibling) { cout << "check out me siblings " << sibling << endl;
 			//red?
 			if (sibling->colour == 1) {
-				rotate2(sibling);
-				sibling = follow->sibling();
+				rotate2a(sibling); cout << "In here now" << endl;
+				sibling->colour = 0;
+				par->colour = 1;
+				sibling = follow->sibling(); cout << "OUT" << endl; cout << sibling << endl;
 			}
 			//case above can fall directly into case below
-			if (follow->up->colour == 1) {
+			if (follow && follow->up->colour == 1) {
 				if (sibling->bothchildrenblack()) {
 					sibling->colour = 1;
 					follow->up->colour = 0;
@@ -441,26 +565,39 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 			if (sibling->bothchildrenblack()){
 				sibling->colour = 1;
 				follow = follow->up;
+				sibling = follow->sibling();
 				continue;
 			}
-			if (follow->up->right == sibling) {
+			if (par->right == sibling) {
 				if (sibling->left &&
-					sibling->left->colour == 1 &&
-					sibling->right->colour == 0)
-					transform1(sibling);
+					sibling->left->colour == 1
+					&& (sibling->right == NULL ||
+					(sibling->right &&
+					sibling->right->colour == 0))){
+						transform1(sibling);
+						sibling = sibling->up;
+						continue;
+					}
 				else {
-					transform2(follow);
+					if (follow)
+						transform2(follow);
 					delete located;
 					return true;
 				}
-			}		
-			else if (follow->up->left == sibling) {
+			}
+			else if (par->left == sibling) {
 				if (sibling->right &&
 					sibling->right->colour == 1 &&
-					sibling->left->colour == 0)
-					transform1(sibling);
+					(sibling->left == NULL ||
+					(sibling->left &&
+					sibling->left->colour == 0))){
+						transform1(sibling);
+						sibling = sibling->up;
+						continue;
+					}
 				else {
-					transform2(follow);
+					if (follow)
+						transform2(follow);
 					delete located;
 					return true;
 				}
@@ -469,6 +606,9 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 			delete located;
 			return true;
 		}
+		if (follow)
+			sibling = follow->sibling();
+
 	}while(true);
 }
 
