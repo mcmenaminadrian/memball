@@ -284,9 +284,6 @@ template <typename NODE> void redblacktree<NODE>::rotate2a(NODE* node)
 		par->right = lefty;
 		if (lefty)
 			lefty->up = par;
-		if (righty)
-			righty->colour = 0;
-		par->colour = 0;
 
 	} else {
 		node->right = par;
@@ -294,9 +291,9 @@ template <typename NODE> void redblacktree<NODE>::rotate2a(NODE* node)
 		par->left = righty;
 		if (righty)
 			righty->up = par;
-		node->colour = 0;
-		par->colour = 1;
 	}
+	par->colour = 1;
+	node->colour = 0;
 }	
 
 //straighten zig zag of two reds
@@ -368,9 +365,9 @@ template <typename NODE> void redblacktree<NODE>::transform1(NODE* node)
 
 template <typename NODE> void redblacktree<NODE>::transform2(NODE* node)
 { cout << "HERE" << endl;
-	int oldcolour = node->up->colour;
+	//int oldcolour = node->up->colour;
 	rotate2a(node);
-	node->colour = oldcolour;
+	//node->colour = oldcolour;
 }
 
 template <typename NODE> void redblacktree<NODE>::balanceinsert(NODE* node)
@@ -511,7 +508,7 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 
 	//located is now a node with only one child at most
 	NODE* par = located->up;
-	NODE* sibling = located->sibling();
+	NODE* sibling = NULL;
 	NODE* follow = NULL;
 	if (lefty)
 		follow = lefty;
@@ -544,11 +541,16 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 		delete located;
 		return true;
 	}
-	NODE* anchor = NULL;
+
 	if (follow)
-		anchor = follow;
-	else
-		anchor = located;
+		sibling = follow->sibling();
+	else if (par) {
+		if (par->left == located)
+			sibling = par->right;
+		else
+			sibling = par->right;
+	}
+
 
 	//loop through the fixes
 	do {
@@ -559,21 +561,21 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 				rotate2a(sibling); cout << "In here now" << endl;
 				sibling->colour = 0;
 				par->colour = 1;
-				sibling = anchor->sibling(); cout << "OUT" << endl; cout << sibling << endl;
+				sibling = follow->sibling(); cout << "OUT" << endl; cout << sibling << endl;
 			}
 			//case above can fall directly into case below
-			if (anchor->up->colour == 1) {
+			if (par->colour == 1) { cout << "testing kids colour" << endl;
 				if (sibling && sibling->bothchildrenblack2()) { cout << "parent red childers black" << endl;
 					sibling->colour = 1;
-					anchor->up->colour = 0;
+					par->colour = 0;
 					delete located;
 					return true;
 				}
 			}
 			if (sibling && sibling->bothchildrenblack()){ cout << "childers are black " << endl;
 				sibling->colour = 1;
-				anchor = anchor->up;
-				sibling = anchor->sibling();
+				follow = follow->up;
+				sibling = follow->sibling();
 				continue;
 			}
 			if (par->right == sibling) {cout << "twist on the right:" << sibling << endl;
@@ -613,12 +615,16 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 				par->colour = 0;
 				delete located;
 				return true;}
-			else {
-				anchor = located->up; cout << "STILL OH NOES?" << endl;
+			else {  cout << "STILL OH NOES?" << endl;
+				if (!follow)
+					follow = located->up;	
+			else
+					follow = follow->up;
+				par = follow->up;
 			}
 		}
-		if (anchor)
-			sibling = anchor->sibling();
+		if (follow)
+			sibling = follow->sibling();
 
 	}while(true);
 }
