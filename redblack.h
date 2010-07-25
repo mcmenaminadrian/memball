@@ -353,7 +353,7 @@ template <typename NODE> void redblacktree<NODE>::transform1(NODE* node)
 }
 
 template <typename NODE> void redblacktree<NODE>::transform2(NODE* node)
-{ cout << "HERE" << endl;
+{
 	NODE* par = node->up;
 	bool leftist = (par->right == node);
 	int oldcolour = par->colour;
@@ -492,7 +492,7 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 	NODE* altnode = NULL;
 	if (located == NULL)
 		return false;
-	cout << "located: " << located << endl;
+	
 	NODE* lefty = located->left;
 	NODE* righty =  located->right;
 	if (lefty && righty){
@@ -500,13 +500,13 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 		if (altnode->colour == 0)
 			altnode = minright(located->right);
 		located->assign(altnode);
-		located = altnode; cout << "Located is now " << located << endl;
+		located = altnode; 
 		lefty = located->left;
 		righty = located->right;
 	}
 
 	//located is now a node with only one child at most
-	NODE* par = located->up; cout << "Par is " << par << endl;
+	NODE* par = located->up;
 	NODE* sibling = located->sibling();
 	NODE* follow = NULL;
 	if (lefty)
@@ -552,10 +552,10 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 	//loop through the fixes
 	do {
 		//test sibling status
-		if (sibling) { cout << "Siblings:" << sibling << " Parent: " << par << endl;
+		if (sibling) {
 			//red?
 			if (sibling->colour == 1) {
-				rotate2a(sibling); cout << "Case 1" << endl;
+				rotate2a(sibling);
 				sibling->colour = 0;
 				par->colour = 1;
 				if (follow)
@@ -566,18 +566,17 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 					else
 						sibling = par->left;
 				}
-				cout << "Sibling now:" << endl; cout << sibling << endl;
 			}
 			//case above can fall directly into case below
 			if (par->colour == 1) {
-				if (sibling && sibling->bothchildrenblack()) { cout << "Case 2" << endl;
+				if (sibling && sibling->bothchildrenblack()) {
 					sibling->colour = 1;
 					par->colour = 0;
 					delete located;
 					return true;
 				}
 			}
-			if (sibling && sibling->bothchildrenblack()){ cout << "Case 3 " << endl;
+			if (sibling && sibling->bothchildrenblack()){
 				sibling->colour = 1;
 				follow = par;
 				sibling = follow->sibling();
@@ -589,7 +588,7 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 				}
 				continue;
 			}
-			if (par->right == sibling) {cout << "twist on the right:" << sibling << endl;
+			if (par->right == sibling) {
 				if (sibling->left &&
 					sibling->left->colour == 1
 					&& (sibling->right == NULL ||
@@ -599,13 +598,13 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 						sibling = sibling->up;
 						continue;
 					}
-				else {	cout << "default twist on the right:" << sibling << endl;
+				else {
 					transform2(sibling);
 					delete located;
 					return true;
 				}
 			}
-			else if (par->left == sibling) {cout << "twist on the left:" << sibling << endl;
+			else if (par->left == sibling) {
 				if (sibling->right &&
 					sibling->right->colour == 1 &&
 					(sibling->left == NULL ||
@@ -615,19 +614,19 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 						sibling = sibling->up;
 						continue;
 					}
-				else { cout << "default twist on the left:" << sibling << endl;
+				else { 
 					transform2(sibling);
 					delete located;
 					return true;
 				}
 			}
 		} else {
-			if (par->colour == 1) { cout << "FIXXXED" << endl;
+			if (par->colour == 1) {
 				par->colour = 0;
 				delete located;
 				return true;
 			}
-			else {  cout << "STILL OH NOES?" << endl;
+			else { 
 				if (!follow)
 					follow = located->up;	
 			else
