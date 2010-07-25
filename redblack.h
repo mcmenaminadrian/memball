@@ -31,7 +31,6 @@ class redblacknode{
  		redblacknode* uncle() const;
 		redblacknode* sibling() const;
 		bool bothchildrenblack() const;
-		bool bothchildrenblack2() const;
 		bool equals(redblacknode*) const;
 		bool lessthan(redblacknode*) const;
 		void assign(redblacknode*);
@@ -152,16 +151,6 @@ template <typename T> redblacknode<T>* redblacknode<T>::uncle() const
 }
 
 template <typename T> bool redblacknode<T>::bothchildrenblack() const
-{
-	if (right && right->colour == 1)
-		return false;
-	if (left && left->colour == 1)
-		return false;
-	if (!left || ! right) return false;
-	return true;
-}
-
-template <typename T> bool redblacknode<T>::bothchildrenblack2() const
 {
 	if (right && right->colour == 1)
 		return false;
@@ -365,9 +354,19 @@ template <typename NODE> void redblacktree<NODE>::transform1(NODE* node)
 
 template <typename NODE> void redblacktree<NODE>::transform2(NODE* node)
 { cout << "HERE" << endl;
-	//int oldcolour = node->up->colour;
+	NODE* par = node->up;
+	bool leftist = (par->right == node);
+	int oldcolour = par->colour;
 	rotate2a(node);
-	//node->colour = oldcolour;
+	node->colour = oldcolour;
+	par->colour = 0;
+	if (leftist){
+		if (node->right)
+			node->right->colour = 0;
+	}
+	else
+		if (node->left)
+			node->left->colour = 0;
 }
 
 template <typename NODE> void redblacktree<NODE>::balanceinsert(NODE* node)
@@ -493,7 +492,7 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 	NODE* altnode = NULL;
 	if (located == NULL)
 		return false;
-
+	cout << "located: " << located << endl;
 	NODE* lefty = located->left;
 	NODE* righty =  located->right;
 	if (lefty && righty){
@@ -501,14 +500,14 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 		if (altnode->colour == 0)
 			altnode = minright(located->right);
 		located->assign(altnode);
-		located = altnode;
+		located = altnode; cout << "Located is now " << located << endl;
 		lefty = located->left;
 		righty = located->right;
 	}
 
 	//located is now a node with only one child at most
-	NODE* par = located->up;
-	NODE* sibling = NULL;
+	NODE* par = located->up; cout << "Par is " << par << endl;
+	NODE* sibling = located->sibling();
 	NODE* follow = NULL;
 	if (lefty)
 		follow = lefty;
@@ -542,40 +541,52 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 		return true;
 	}
 
-	if (follow)
-		sibling = follow->sibling();
-	else if (par) {
-		if (par->left == located)
-			sibling = par->right;
-		else
-			sibling = par->right;
+	if (!follow && !par)
+	{
+		//tree is now empty
+		delete located;
+		root = NULL;
+		return true;
 	}
-
 
 	//loop through the fixes
 	do {
 		//test sibling status
-		if (sibling) { cout << "check out me siblings " << sibling << endl;
+		if (sibling) { cout << "Siblings:" << sibling << " Parent: " << par << endl;
 			//red?
 			if (sibling->colour == 1) {
-				rotate2a(sibling); cout << "In here now" << endl;
+				rotate2a(sibling); cout << "Case 1" << endl;
 				sibling->colour = 0;
 				par->colour = 1;
-				sibling = follow->sibling(); cout << "OUT" << endl; cout << sibling << endl;
+				if (follow)
+					sibling = follow->sibling(); 
+				else {
+					if (par->right)
+						sibling = par->right;
+					else
+						sibling = par->left;
+				}
+				cout << "Sibling now:" << endl; cout << sibling << endl;
 			}
 			//case above can fall directly into case below
-			if (par->colour == 1) { cout << "testing kids colour" << endl;
-				if (sibling && sibling->bothchildrenblack2()) { cout << "parent red childers black" << endl;
+			if (par->colour == 1) {
+				if (sibling && sibling->bothchildrenblack()) { cout << "Case 2" << endl;
 					sibling->colour = 1;
 					par->colour = 0;
 					delete located;
 					return true;
 				}
 			}
-			if (sibling && sibling->bothchildrenblack()){ cout << "childers are black " << endl;
+			if (sibling && sibling->bothchildrenblack()){ cout << "Case 3 " << endl;
 				sibling->colour = 1;
-				follow = follow->up;
+				follow = par;
 				sibling = follow->sibling();
+				par = follow->up;
+				if (par == NULL) {
+					//at root can go no further
+					delete located;
+					return true;
+				}
 				continue;
 			}
 			if (par->right == sibling) {cout << "twist on the right:" << sibling << endl;
@@ -594,13 +605,13 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 					return true;
 				}
 			}
-			else if (par->left == sibling) {cout << "twist on the right:" << sibling << endl;
+			else if (par->left == sibling) {cout << "twist on the left:" << sibling << endl;
 				if (sibling->right &&
 					sibling->right->colour == 1 &&
 					(sibling->left == NULL ||
 					(sibling->left &&
 					sibling->left->colour == 0))){
-						transform1(sibling);
+						transform2(sibling);
 						sibling = sibling->up;
 						continue;
 					}
@@ -614,7 +625,8 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 			if (par->colour == 1) { cout << "FIXXXED" << endl;
 				par->colour = 0;
 				delete located;
-				return true;}
+				return true;
+			}
 			else {  cout << "STILL OH NOES?" << endl;
 				if (!follow)
 					follow = located->up;	
