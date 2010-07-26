@@ -44,6 +44,7 @@ class redblacktree {
 	private:
 		int depth; //helps with drawing
 		void balanceinsert(NODE*);
+		void rotate3(NODE*);
 		void rotate2(NODE*);
 		void rotate2a(NODE*);
 		void rotate1(NODE*);
@@ -61,8 +62,9 @@ class redblacktree {
 		NODE* max() const;
 		redblacktree();
 		~redblacktree();
+		int blackheightleft() const;
+		int blackheightright() const;
 };
-
 
 template <typename T> void redblacknode<T>::showinorder(redblacknode<T>* node) const
 {
@@ -194,6 +196,31 @@ template <typename NODE> void redblacktree<NODE>::free(NODE* v)
 	free(tmp);
 }
 
+template <typename NODE> int redblacktree<NODE>::blackheightleft() const
+{
+	int height = 0;
+	NODE* node = root;
+	while (node) {
+		if (node->colour == 0)
+			height++;
+		node = node->left;
+	}
+	return height;
+}
+
+template <typename NODE> int redblacktree<NODE>::blackheightright() const
+{
+	int height = 0;
+	NODE* node = root;
+	while (node) {
+		if (node->colour == 0)
+			height++;
+		node = node->right;
+	}
+	return height;
+}
+
+
 template <typename NODE> redblacktree<NODE>::redblacktree()
 {
 	root = NULL;
@@ -247,6 +274,34 @@ template <typename NODE> void redblacktree<NODE>::rotate2(NODE* node)
 	if (!par)
 		root = centrenode;
 }
+
+template <typename NODE> void redblacktree<NODE>::rotate3(NODE* node)
+{
+	if (!node || !node->up)
+		return;
+	NODE* par = node->up;
+	NODE* righty = node->right;
+	NODE* lefty = node->left;
+
+	if (par->left == node) {
+		par->left = righty;
+		righty->colour = 0;
+		righty->up = par;
+		node->up = righty;
+		node->right = righty->left;
+		righty->left = node;
+		node->colour = 1;
+	}
+	else {
+		par->right = lefty;
+		lefty->colour = 0;
+		lefty->up = par;
+		node->up = lefty;
+		node->left = lefty->right;
+		lefty->right = node;
+		node->colour = 1;
+	}
+}			
 
 template <typename NODE> void redblacktree<NODE>::rotate2a(NODE* node)
 {
@@ -496,10 +551,10 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 	NODE* lefty = located->left;
 	NODE* righty =  located->right;
 	if (lefty && righty){
-		altnode = maxleft(located->left);
-		if (altnode->colour == 0)
+		altnode = maxleft(located->left); cout << "altnode is " << altnode << endl;
+		if (altnode->colour == 0) 
 			altnode = minright(located->right);
-		located->assign(altnode);
+		located->assign(altnode); cout << "now altnode is " << altnode << endl;
 		located = altnode; 
 		lefty = located->left;
 		righty = located->right;
@@ -554,29 +609,29 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 		//test sibling status
 		if (sibling) {
 			//red?
-			if (sibling->colour == 1) {
+			if (sibling->colour == 1) { cout << sibling << ": sibling red" << endl;
 				rotate2a(sibling);
 				sibling->colour = 0;
-				par->colour = 1;
+				par->colour = 1; cout << follow << "<<<<< follow" << endl;
 				if (follow)
 					sibling = follow->sibling(); 
 				else {
-					if (par->right)
+					if (par->right != located)
 						sibling = par->right;
 					else
 						sibling = par->left;
 				}
 			}
 			//case above can fall directly into case below
-			if (par->colour == 1) {
-				if (sibling && sibling->bothchildrenblack()) {
+			if (par->colour == 1) { cout << "HERE with sibling " << sibling << endl;
+				if (sibling && sibling->bothchildrenblack()) { cout << sibling << ": case 2c" << endl;
 					sibling->colour = 1;
 					par->colour = 0;
 					delete located;
 					return true;
 				}
 			}
-			if (sibling && sibling->bothchildrenblack()){
+			if (sibling && sibling->bothchildrenblack()){ cout << sibling << ": both children black" << endl;
 				sibling->colour = 1;
 				follow = par;
 				sibling = follow->sibling();
@@ -588,39 +643,39 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 				}
 				continue;
 			}
-			if (par->right == sibling) {
+			if (par->right == sibling) { cout << sibling << "twist right" << endl;
 				if (sibling->left &&
 					sibling->left->colour == 1
 					&& (sibling->right == NULL ||
 					(sibling->right &&
 					sibling->right->colour == 0))){
-						transform1(sibling);
+						rotate3(sibling);
 						sibling = sibling->up;
 						continue;
 					}
-				else {
+				else { cout << "default right" << endl;
 					transform2(sibling);
 					delete located;
 					return true;
 				}
 			}
-			else if (par->left == sibling) {
+			else if (par->left == sibling) { cout << sibling << ":twist left" << endl;
 				if (sibling->right &&
 					sibling->right->colour == 1 &&
 					(sibling->left == NULL ||
 					(sibling->left &&
 					sibling->left->colour == 0))){
-						transform2(sibling);
+						rotate3(sibling);
 						sibling = sibling->up;
 						continue;
 					}
-				else { 
+				else { cout << "default left" << endl;
 					transform2(sibling);
 					delete located;
 					return true;
 				}
 			}
-		} else {
+		} else { cout << "located :" << located << " but no sibling" << endl;
 			if (par->colour == 1) {
 				par->colour = 0;
 				delete located;
