@@ -48,7 +48,6 @@ class redblacktree {
 		void rotate2(NODE*);
 		void rotate2a(NODE*);
 		void rotate1(NODE*);
-		void transform1(NODE*);
 		void transform2(NODE*);
 		void free(NODE*);
 		NODE* maxleft(NODE*) const;
@@ -378,50 +377,15 @@ template <typename NODE> void redblacktree<NODE>::rotate1(NODE* node)
 	}
 }
 
-template <typename NODE> void redblacktree<NODE>::transform1(NODE* node)
-{
-	NODE* par = node->up;
-	NODE* lefty = node->left;
-	NODE* righty = node->right;
-	if (lefty && lefty->colour == 1) {
-		par->right = lefty;
-		lefty->colour = 0;
-		lefty->up = par;
-		node->left = lefty->right;
-		if (node->left)
-			node->left->up = node;
-		lefty->right = node;
-		node->up = lefty;
-		node->colour = 1;
-	}
-	else if (righty && righty->colour == 1) {
-		par->left = righty;
-		righty->colour = 0;
-		righty->up = par;
-		node->right = righty->left;
-		if (node->right)
-			node->right->up = node;
-		righty->left = node;
-		node->up = righty;
-		node->colour = 1;
-	}
-}
-
 template <typename NODE> void redblacktree<NODE>::transform2(NODE* node)
 {
-	NODE* par = node->up;
-	bool leftist = (par->right == node);
-	int oldcolour = par->colour;
+	int oldcolour = node->up->colour;
 	rotate2a(node);
 	node->colour = oldcolour;
-	par->colour = 0;
-	if (leftist){
-		if (node->right)
-			node->right->colour = 0;
-	}
-	else
-		if (node->left)
-			node->left->colour = 0;
+	if (node->left)
+		node->left->colour = 0;
+	if (node->right)
+		node->right->colour = 0;
 }
 
 template <typename NODE> void redblacktree<NODE>::balanceinsert(NODE* node)
@@ -606,32 +570,38 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 
 	//loop through the fixes
 	do {
+		if (sibling == root)
+		{
+			delete located;
+			return true;
+		}
 		//test sibling status
 		if (sibling) {
 			//red?
 			if (sibling->colour == 1) { cout << sibling << ": sibling red" << endl;
+				bool leftist = (par->left == sibling);
 				rotate2a(sibling);
 				sibling->colour = 0;
 				par->colour = 1; cout << follow << "<<<<< follow" << endl;
 				if (follow)
 					sibling = follow->sibling(); 
-				else {
-					if (par->right != located)
-						sibling = par->right;
-					else
+				else { cout << par << ":par" << endl;
+					if (leftist)
 						sibling = par->left;
+					else
+						sibling = par->right;
 				}
 			}
 			//case above can fall directly into case below
 			if (par->colour == 1) { cout << "HERE with sibling " << sibling << endl;
-				if (sibling && sibling->bothchildrenblack()) { cout << sibling << ": case 2c" << endl;
+				if (sibling->bothchildrenblack()) { cout << sibling << ": case 2c" << endl;
 					sibling->colour = 1;
 					par->colour = 0;
 					delete located;
 					return true;
 				}
 			}
-			if (sibling && sibling->bothchildrenblack()){ cout << sibling << ": both children black" << endl;
+			else if (sibling->bothchildrenblack()){ cout << sibling << ": both children black" << endl;
 				sibling->colour = 1;
 				follow = par;
 				sibling = follow->sibling();
