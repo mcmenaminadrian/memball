@@ -80,16 +80,16 @@ template <typename T> void redblacknode<T>::showpreorder(redblacknode<T>* node) 
 	if (node == NULL)
 		return;
 	cout << node->value << ", ";
-	showinorder(node->left);
-	showinorder(node->right);
+	showpreorder(node->left);
+	showpreorder(node->right);
 }
 
 template <typename T> void redblacknode<T>::showpostorder(redblacknode<T>* node) const
 {
 	if (node == NULL)
 		return;
-	showinorder(node->left);
-	showinorder(node->right);
+	showpostorder(node->left);
+	showpostorder(node->right);
 	cout << node->value << ", ";
 }
 
