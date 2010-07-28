@@ -64,8 +64,6 @@ class redblacktree {
 		int count() const;
 		redblacktree();
 		~redblacktree();
-		int blackheightleft() const;
-		int blackheightright() const;
 };
 
 template <typename T> void redblacknode<T>::showinorder(redblacknode<T>* node) const
@@ -197,31 +195,6 @@ template <typename NODE> void redblacktree<NODE>::free(NODE* v)
 	delete v;
 	free(tmp);
 }
-
-template <typename NODE> int redblacktree<NODE>::blackheightleft() const
-{
-	int height = 0;
-	NODE* node = root;
-	while (node) {
-		if (node->colour == 0)
-			height++;
-		node = node->left;
-	}
-	return height;
-}
-
-template <typename NODE> int redblacktree<NODE>::blackheightright() const
-{
-	int height = 0;
-	NODE* node = root;
-	while (node) {
-		if (node->colour == 0)
-			height++;
-		node = node->right;
-	}
-	return height;
-}
-
 
 template <typename NODE> redblacktree<NODE>::redblacktree()
 {
