@@ -67,6 +67,7 @@ int main()
 		redblacknode<int> t(proctree->min());
 		cout << "deleting min" << endl;
 		proctree->removenode(t);
+		cout << "count is " << proctree->count() << endl;
 		if (proctree->blackheightleft() != proctree->blackheightright()) {
 			cout << endl << "left height is " << proctree->blackheightleft() << " right height is " << proctree->blackheightright() << endl;
 			cout << proctree->root << endl;
