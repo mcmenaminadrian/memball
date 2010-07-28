@@ -517,10 +517,10 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 	NODE* lefty = located->left;
 	NODE* righty =  located->right;
 	if (lefty && righty){
-		altnode = maxleft(located->left); cout << "altnode is " << altnode << endl;
+		altnode = maxleft(located->left);
 		if (altnode->colour == 0) 
 			altnode = minright(located->right);
-		located->assign(altnode); cout << "now altnode is " << altnode << endl;
+		located->assign(altnode);
 		located = altnode; 
 		lefty = located->left;
 		righty = located->right;
@@ -580,14 +580,14 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 		//test sibling status
 		if (sibling) {
 			//red?
-			if (sibling->colour == 1) { cout << sibling << ": sibling red" << endl;
+			if (sibling->colour == 1) {
 				bool leftist = (par->left == sibling);
 				rotate2a(sibling);
 				sibling->colour = 0;
-				par->colour = 1; cout << follow << "<<<<< follow" << endl;
+				par->colour = 1;
 				if (follow)
 					sibling = follow->sibling(); 
-				else { cout << par << ":par" << endl;
+				else {
 					if (leftist)
 						sibling = par->left;
 					else
@@ -595,15 +595,15 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 				}
 			}
 			//case above can fall directly into case below
-			if (par->colour == 1) { cout << "HERE with sibling " << sibling << endl;
-				if (sibling->bothchildrenblack()) { cout << sibling << ": case 2c" << endl;
+			if (par->colour == 1) {
+				if (sibling->bothchildrenblack()) {
 					sibling->colour = 1;
 					par->colour = 0;
 					delete located;
 					return true;
 				}
 			}
-			else if (sibling->bothchildrenblack()){ cout << sibling << ": both children black" << endl;
+			else if (sibling->bothchildrenblack()){
 				sibling->colour = 1;
 				follow = par;
 				sibling = follow->sibling();
@@ -615,7 +615,7 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 				}
 				continue;
 			}
-			if (par->right == sibling) { cout << sibling << "twist right" << endl;
+			if (par->right == sibling) {
 				if (sibling->left &&
 					sibling->left->colour == 1
 					&& (sibling->right == NULL ||
@@ -625,13 +625,13 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 						sibling = sibling->up;
 						continue;
 					}
-				else { cout << "default right" << endl;
+				else {
 					transform2(sibling);
 					delete located;
 					return true;
 				}
 			}
-			else if (par->left == sibling) { cout << sibling << ":twist left" << endl;
+			else if (par->left == sibling) {
 				if (sibling->right &&
 					sibling->right->colour == 1 &&
 					(sibling->left == NULL ||
@@ -641,13 +641,13 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 						sibling = sibling->up;
 						continue;
 					}
-				else { cout << "default left" << endl;
+				else {
 					transform2(sibling);
 					delete located;
 					return true;
 				}
 			}
-		} else { cout << "located :" << located << " but no sibling" << endl;
+		} else {
 			if (par->colour == 1) {
 				par->colour = 0;
 				delete located;
