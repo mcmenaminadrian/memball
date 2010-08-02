@@ -14,7 +14,9 @@ class redblacknode{
 
 	template <typename Z> friend ostream& operator<<(ostream& os,
 		redblacknode<Z>* rbtp);
-	template <typename RBN> friend void streamrbt(ostream& os, RBN* node);
+	template <typename Z> friend void streamrbt(ostream& os, redblacknode<Z>* node);
+	template <typename Z> friend void drawnextroot(redblacknode<Z>* node, int);
+	template <typename Z> friend void drawTEXtree(redblacknode<Z>* node);
 
 	private:
 		T value;
@@ -667,7 +669,7 @@ template <typename NODE> bool redblacktree<NODE>::removenode(NODE& v)
 	}while(true);
 }
 
-template <typename RBN> void streamrbt(ostream& os, RBN* node)
+template <typename T> void streamrbt(ostream& os, redblacknode<T>* node)
 {
 	if (node == NULL) 
 		return;
@@ -688,5 +690,48 @@ template <typename T> ostream& operator<<(ostream& os, redblacknode<T>* rbn)
 	return os;
 }		
 
+template <typename T> void drawnextroot(redblacknode< T >* rbn, int k) 
+{
+	for (int x = 0; x < k; x++)
+		cout << " ";
+	cout << "\\pstree{\\Tcircle";
+	if (rbn->colour == 1)
+		cout << "[linecolor=red]";
+	cout << "{" << rbn->value << "}}{" << endl;
+	if (rbn->left == NULL && rbn->right == NULL) {
+		for (int x = 0; x < k; x++)
+			cout << " ";
+		cout << "\\TC*\\TC*}" << endl;
+		return;
+	}
+	if (rbn->left == NULL) {
+		for (int x = 0; x < k; x++)
+			cout << " ";
+		cout << "\\TC*" << endl;
+	}
+	else
+		drawnextroot(rbn->left, ++k);
+	if (rbn->right == NULL) {
+		for (int x = 0; x < k; x++)
+			cout << " ";
+		cout << "\\TC*" << endl;
+	}
+	else
+		drawnextroot(rbn->right, ++k);
+
+	for (int x = 0; x<k; x++)
+		cout << " ";
+	cout << "}" << endl;
+}
+
+
+template <typename T> void drawTEXtree(redblacknode< T >* rbn)
+{
+	cout << "\\usepackage{pstricks,pst-tree}" << endl;
+	if (rbn == NULL) 
+		return;
+	drawnextroot(rbn, 0);
+}
+	
 
 #endif
