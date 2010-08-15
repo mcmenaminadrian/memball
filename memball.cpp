@@ -60,15 +60,18 @@ int main()
 	}
 
 	closeproc(ptab);
-	redblacknode<int>* top = proctree->root;
-	do {
-		proctree->root->showinorder(proctree->root);
-		cout << endl << endl << proctree->root << endl;
-		redblacknode<int> t(proctree->min());
-		cout << "deleting min" << endl;
-		proctree->removenode(t);
-		cout << "count is " << proctree->count() << endl;
-	} while (proctree->root);
+
+//	redblacknode<int>* top = proctree->root;
+//	drawTEXtree(top);
+//	do {
+//		proctree->root->showpostorder(proctree->root);
+//		cout << endl << endl << proctree->root << endl;
+		drawGraphMLtree(proctree->root);
+//		redblacknode<int> t(proctree->min());
+//		cout << "deleting min" << endl;
+//		proctree->removenode(t);
+//		cout << "count is " << proctree->count() << endl;
+//	} while (proctree->root);
 	
 
 	delete proctree;	
