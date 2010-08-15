@@ -17,6 +17,8 @@ class redblacknode{
 	template <typename Z> friend void streamrbt(ostream& os, redblacknode<Z>* node);
 	template <typename Z> friend void drawnextroot(redblacknode<Z>* node, int);
 	template <typename Z> friend void drawTEXtree(redblacknode<Z>* node);
+	template <typename Z> friend void drawnextxml(redblacknode<Z>* node, int, int&);
+	template <typename Z> friend void drawGraphMLtree(redblacknode<Z>* node);
 
 	private:
 		T value;
@@ -719,7 +721,7 @@ template <typename T> void drawnextroot(redblacknode< T >* rbn, int k)
 	else
 		drawnextroot(rbn->right, ++k);
 
-	for (int x = 0; x<k; x++)
+	for (int x = 0; x < (k - 1); x++)
 		cout << " ";
 	cout << "}" << endl;
 }
@@ -731,6 +733,51 @@ template <typename T> void drawTEXtree(redblacknode< T >* rbn)
 	if (rbn == NULL) 
 		return;
 	drawnextroot(rbn, 0);
+}
+
+template <typename T> void drawnextxml(redblacknode<T>* rbn, int x, int& cnt)
+{
+	cout << "<graph id=\"" << x << "\" edgedefault=\"directed\">" << endl;
+	cout << "<node id =\"" << x << "\" >" << endl;
+	if (rbn->colour == 1)
+		cout << "<data key=\"c\">red</data>" << endl;
+	cout << "<data key=\"v\">" << rbn->value << "</data>" << endl;
+	cout << "</node>" << endl;
+	cout << "<edge id=\"l" << x << "\" source=\"" << x;
+	cout << "\" target =\"" << ++cnt << "\" />" << endl;
+	if (rbn->left)
+		drawnextxml(rbn->left, cnt, cnt);
+	else 
+		cout << "<node id =\"" << cnt << "\" />" << endl;
+	cout << "<edge id=\"r" << x << "\" source=\"" << x;
+	cout << "\" target=\"" << ++cnt << "\" />" << endl;
+	if (rbn->right)
+		drawnextxml(rbn->right, cnt, cnt);
+	else
+		cout << "<node id =\"" << cnt << "\" />" << endl;
+	cout << "</graph>" << endl;
+}
+
+template <typename T> void drawGraphMLtree(redblacknode<T>* rbn)
+{
+	cout << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
+	cout << "<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\"" << endl;
+	cout << "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" << endl;
+	cout << "xsi:schemaLocation=\"http://graphml.graphdrawing.org/xmlns" << endl;
+	cout << "http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd\">" << endl;
+	cout << "<key id=\"c\" for=\"node\" attr.name=\"colour\" attr.type=\"string\" >" << endl;
+	cout << "<default>black</default>" << endl;
+	cout << "</key>" << endl;
+	cout << "<key id=\"v\" for=\"node\" attr.name=\"value\" attr.type=\"string\" >" << endl;
+	cout << "<default>NULL</default>" << endl;
+	cout << "</key>" << endl;
+	cout << "<graph id=\"redblacktree-";
+	time_t timenow;
+	cout << time(&timenow) << "\" edgedefault=\"directed\">" << endl;
+	int cnt = 0;
+	if (rbn)
+		drawnextxml(rbn, 0, cnt);
+	cout << "</graph>" << endl << "</graphml>" << endl;
 }
 	
 
