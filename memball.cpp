@@ -1,4 +1,5 @@
 #include <iostream>
+#include "string.h"
 #include "/usr/include/proc/readproc.h"
 #include "redblack.hpp"
 
@@ -42,8 +43,57 @@ template <typename R> void show_preorder(R* node)
 	show_preorder(node->right);
 }
 
-int main()
+void usage()
 {
+	cout << "Correct usage is ./memball [--option]" << endl;
+	cout << "Options are:" << endl;
+	cout << "--gxml		GraphML output (default)" << endl;
+	cout << "--tex		LaTeX output" << endl;
+	cout << "--plain 	Plain text output" << endl;
+}
+
+int main(int argc, char* argv[])
+{
+
+	//default is to output GraphML
+	// --gxml GRAPHML output
+	// --tex TEX output
+	// --plain plain text output
+
+	bool gxml = true;
+	bool tex = false;
+	bool plain = false;
+	if (argc > 2) {
+		usage();
+		return 1;
+	}
+
+	if (argc == 2) {
+		if (argv[1][0] != '-') {
+			usage();
+			return 1;
+		}
+
+		if (strcmp(argv[1], "-?") == 0) {
+			usage();
+			return 0;
+		}
+
+		if (strcmp(argv[1], "--gxml") == 0)
+			;
+		else if (strcmp(argv[1], "--tex") == 0) {
+			gxml = false;
+			tex = true;
+		}
+		else if (strcmp(argv[1], "--plain") == 0) {
+			gxml = false;
+			plain = true;	
+		} else {
+			usage();
+			return 1;
+		}
+	}
+
 	pagesize = getpagesize();
 	redblacktree< redblacknode<int> >* proctree;
 	proctree = new redblacktree<redblacknode<int> >();
@@ -61,18 +111,12 @@ int main()
 
 	closeproc(ptab);
 
-//	redblacknode<int>* top = proctree->root;
-//	drawTEXtree(top);
-//	do {
-//		proctree->root->showpostorder(proctree->root);
-//		cout << endl << endl << proctree->root << endl;
+	if (gxml)
 		drawGraphMLtree(proctree->root);
-//		redblacknode<int> t(proctree->min());
-//		cout << "deleting min" << endl;
-//		proctree->removenode(t);
-//		cout << "count is " << proctree->count() << endl;
-//	} while (proctree->root);
-	
+	else if (tex)
+		drawTEXtree(proctree->root);
+	else
+		cout << proctree->root << endl;
 
 	delete proctree;	
 
