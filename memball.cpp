@@ -1,6 +1,6 @@
 #include <iostream>
 #include "/usr/include/proc/readproc.h"
-#include "redblack.h"
+#include "redblack.hpp"
 
 using namespace std;
 
