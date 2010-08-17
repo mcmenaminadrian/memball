@@ -1,6 +1,3 @@
-#ifndef __REDBLACKTREE__
-#define __REDBLACKTREE__
-
 #include <iostream>
 
 using namespace std;
@@ -779,6 +776,3 @@ template <typename T> void drawGraphMLtree(redblacknode<T>* rbn)
 		drawnextxml(rbn, 0, cnt);
 	cout << "</graph>" << endl << "</graphml>" << endl;
 }
-	
-
-#endif
