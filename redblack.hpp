@@ -12,10 +12,10 @@ class redblacknode{
 	template <typename Z> friend ostream& operator<<(ostream& os,
 		redblacknode<Z>* rbtp);
 	template <typename Z> friend void streamrbt(ostream& os, redblacknode<Z>* node);
-	template <typename Z> friend void drawnextroot(redblacknode<Z>* node, int);
-	template <typename Z> friend void drawTEXtree(redblacknode<Z>* node);
-	template <typename Z> friend void drawnextxml(redblacknode<Z>* node, int, int&);
-	template <typename Z> friend void drawGraphMLtree(redblacknode<Z>* node);
+	template <typename Z> friend void drawnextroot(redblacknode<Z>* node, int, ostream&);
+	template <typename Z> friend void drawTEXtree(redblacknode<Z>* node, ostream&);
+	template <typename Z> friend void drawnextxml(redblacknode<Z>* node, int, int&, ostream&);
+	template <typename Z> friend void drawGraphMLtree(redblacknode<Z>* node, ostream&);
 
 	private:
 		T value;
@@ -689,90 +689,90 @@ template <typename T> ostream& operator<<(ostream& os, redblacknode<T>* rbn)
 	return os;
 }		
 
-template <typename T> void drawnextroot(redblacknode< T >* rbn, int k) 
+template <typename T> void drawnextroot(redblacknode< T >* rbn, int k, ostream& outstream) 
 {
 	for (int x = 0; x < k; x++)
-		cout << " ";
-	cout << "\\pstree{\\Tcircle";
+		outstream << " ";
+	outstream << "\\pstree{\\Tcircle";
 	if (rbn->colour == 1)
-		cout << "[linecolor=red]";
-	cout << "{" << rbn->value << "}}{" << endl;
+		outstream << "[linecolor=red]";
+	outstream << "{" << rbn->value << "}}{" << endl;
 	if (rbn->left == NULL && rbn->right == NULL) {
 		for (int x = 0; x < k; x++)
-			cout << " ";
-		cout << "\\TC*\\TC*}" << endl;
+			outstream << " ";
+		outstream << "\\TC*\\TC*}" << endl;
 		return;
 	}
 	if (rbn->left == NULL) {
 		for (int x = 0; x < k; x++)
-			cout << " ";
-		cout << "\\TC*" << endl;
+			outstream << " ";
+		outstream << "\\TC*" << endl;
 	}
 	else
-		drawnextroot(rbn->left, ++k);
+		drawnextroot(rbn->left, ++k, outstream);
 	if (rbn->right == NULL) {
 		for (int x = 0; x < k; x++)
-			cout << " ";
-		cout << "\\TC*" << endl;
+			outstream << " ";
+		outstream << "\\TC*" << endl;
 	}
 	else
-		drawnextroot(rbn->right, ++k);
+		drawnextroot(rbn->right, ++k, outstream);
 
 	for (int x = 0; x < (k - 1); x++)
-		cout << " ";
-	cout << "}" << endl;
+		outstream << " ";
+	outstream << "}" << endl;
 }
 
 
-template <typename T> void drawTEXtree(redblacknode< T >* rbn)
+template <typename T> void drawTEXtree(redblacknode< T >* rbn, ostream& outstream)
 {
-	cout << "\\usepackage{pstricks,pst-tree}" << endl;
+	outstream << "\\usepackage{pstricks,pst-tree}" << endl;
 	if (rbn == NULL) 
 		return;
-	drawnextroot(rbn, 0);
+	drawnextroot(rbn, 0, outstream);
 }
 
-template <typename T> void drawnextxml(redblacknode<T>* rbn, int x, int& cnt)
+template <typename T> void drawnextxml(redblacknode<T>* rbn, int x, int& cnt, ostream& outstream)
 {
-	cout << "<graph id=\"" << x << "\" edgedefault=\"directed\">" << endl;
-	cout << "<node id =\"" << x << "\" >" << endl;
+	outstream << "<graph id=\"" << x << "\" edgedefault=\"directed\">" << endl;
+	outstream << "<node id =\"" << x << "\" >" << endl;
 	if (rbn->colour == 1)
-		cout << "<data key=\"c\">red</data>" << endl;
-	cout << "<data key=\"v\">" << rbn->value << "</data>" << endl;
-	cout << "</node>" << endl;
-	cout << "<edge id=\"l" << x << "\" source=\"" << x;
-	cout << "\" target =\"" << ++cnt << "\" />" << endl;
+		outstream << "<data key=\"c\">red</data>" << endl;
+	outstream << "<data key=\"v\">" << rbn->value << "</data>" << endl;
+	outstream << "</node>" << endl;
+	outstream << "<edge id=\"l" << x << "\" source=\"" << x;
+	outstream << "\" target =\"" << ++cnt << "\" />" << endl;
 	if (rbn->left)
-		drawnextxml(rbn->left, cnt, cnt);
+		drawnextxml(rbn->left, cnt, cnt, outstream);
 	else 
-		cout << "<node id =\"" << cnt << "\" />" << endl;
-	cout << "<edge id=\"r" << x << "\" source=\"" << x;
-	cout << "\" target=\"" << ++cnt << "\" />" << endl;
+		outstream << "<node id =\"" << cnt << "\" />" << endl;
+	outstream << "<edge id=\"r" << x << "\" source=\"" << x;
+	outstream << "\" target=\"" << ++cnt << "\" />" << endl;
 	if (rbn->right)
-		drawnextxml(rbn->right, cnt, cnt);
+		drawnextxml(rbn->right, cnt, cnt, outstream);
 	else
-		cout << "<node id =\"" << cnt << "\" />" << endl;
-	cout << "</graph>" << endl;
+		outstream << "<node id =\"" << cnt << "\" />" << endl;
+	outstream << "</graph>" << endl;
 }
 
-template <typename T> void drawGraphMLtree(redblacknode<T>* rbn)
+template <typename T> void drawGraphMLtree(redblacknode<T>* rbn, ostream& outstream)
 {
-	cout << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
-	cout << "<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\"" << endl;
-	cout << "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" << endl;
-	cout << "xsi:schemaLocation=\"http://graphml.graphdrawing.org/xmlns" << endl;
-	cout << "http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd\">" << endl;
-	cout << "<key id=\"c\" for=\"node\" attr.name=\"colour\" attr.type=\"string\" >" << endl;
-	cout << "<default>black</default>" << endl;
-	cout << "</key>" << endl;
-	cout << "<key id=\"v\" for=\"node\" attr.name=\"value\" attr.type=\"string\" >" << endl;
-	cout << "<default>NULL</default>" << endl;
-	cout << "</key>" << endl;
-	cout << "<graph id=\"redblacktree-";
+	outstream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
+	outstream << "<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\"" << endl;
+	outstream << "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" << endl;
+	outstream << "xsi:schemaLocation=\"http://graphml.graphdrawing.org/xmlns" << endl;
+	outstream << "http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd\">" << endl;
+	outstream << "<key id=\"c\" for=\"node\" attr.name=\"colour\" attr.type=\"string\" >" << endl;
+	outstream << "<default>black</default>" << endl;
+	outstream << "</key>" << endl;
+	outstream << "<key id=\"v\" for=\"node\" attr.name=\"value\" attr.type=\"string\" >" << endl;
+	outstream << "<default>NULL</default>" << endl;
+	outstream << "</key>" << endl;
+	outstream << "<graph id=\"redblacktree-";
 	time_t timenow;
-	cout << time(&timenow) << "\" edgedefault=\"directed\">" << endl;
+	outstream << time(&timenow) << "\" edgedefault=\"directed\">" << endl;
 	int cnt = 0;
 	if (rbn)
-		drawnextxml(rbn, 0, cnt);
-	cout << "</graph>" << endl << "</graphml>" << endl;
+		drawnextxml(rbn, 0, cnt, outstream);
+	outstream << "</graph>" << endl << "</graphml>" << endl;
 }
