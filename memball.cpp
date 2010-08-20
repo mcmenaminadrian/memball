@@ -149,16 +149,36 @@ int main(int argc, char* argv[])
 
 	while (proc_details = readproc(ptab, NULL))
 	{
-		if (procmem && proc_details->resident) {
-			redblacknode<unsigned long long>* x =
-				new redblacknode<unsigned long long>(proc_details->resident);
-			proctree->insertnode(x, proctree->root);
-			break;
+		//ignore 0 memory but not 0 cpu time
+		if (sharesize && proc_details->share) {
+			proctree->insertnode(new
+			redblacknode<unsigned long long>(proc_details->share),
+			proctree->root);
+			continue;
 		}
-		if (cputime && proc_details->utime) {
-			redblacknode<unsigned long long>* x =
-				new redblacknode<unsigned long long>(proc_details->utime);
-			proctree->insertnode(x, proctree->root);
+
+		if (virtsize && proc_details->size) {
+			proctree->insertnode(new
+			redblacknode<unsigned long long>(proc_details->size),
+			proctree->root);
+			continue;
+		}
+
+		if (procmem && proc_details->resident) {
+			proctree->insertnode(new
+			redblacknode<unsigned long long>(proc_details->resident), 
+			proctree->root);
+			continue;
+		}
+
+		if (cputime) {  
+			proctree->
+				insertnode(new
+				redblacknode<unsigned long long>(
+				proc_details->utime +
+				proc_details->stime),
+				proctree->root);
+			continue;
 		}
 	}
 

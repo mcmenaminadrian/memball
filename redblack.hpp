@@ -726,10 +726,12 @@ template <typename T> void drawnextroot(redblacknode< T >* rbn, int k, ostream& 
 
 template <typename T> void drawTEXtree(redblacknode< T >* rbn, ostream& outstream)
 {
+	outstream << "\\documentclass{a0poster}" << endl;
 	outstream << "\\usepackage{pstricks,pst-tree}" << endl;
-	if (rbn == NULL) 
-		return;
-	drawnextroot(rbn, 0, outstream);
+	outstream << "\\begin{document}" << endl;
+	if (rbn != NULL) 
+		drawnextroot(rbn, 0, outstream);
+	outstream << "\\end{document}" << endl;
 }
 
 template <typename T> void drawnextxml(redblacknode<T>* rbn, int x, int& cnt, ostream& outstream)
