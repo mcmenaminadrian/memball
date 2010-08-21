@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "string.h"
+#include <stdlib.h>
 #include "/usr/include/proc/readproc.h"
 #include "redblack.hpp"
 
@@ -154,6 +155,7 @@ int main(int argc, char* argv[])
 			proctree->insertnode(new
 			redblacknode<unsigned long long>(proc_details->share),
 			proctree->root);
+			free(proc_details);
 			continue;
 		}
 
@@ -161,6 +163,7 @@ int main(int argc, char* argv[])
 			proctree->insertnode(new
 			redblacknode<unsigned long long>(proc_details->size),
 			proctree->root);
+			free(proc_details);
 			continue;
 		}
 
@@ -168,6 +171,7 @@ int main(int argc, char* argv[])
 			proctree->insertnode(new
 			redblacknode<unsigned long long>(proc_details->resident), 
 			proctree->root);
+			free(proc_details);
 			continue;
 		}
 
@@ -178,8 +182,12 @@ int main(int argc, char* argv[])
 				proc_details->utime +
 				proc_details->stime),
 				proctree->root);
+			free(proc_details);
 			continue;
+			
 		}
+		free(proc_details);
+		
 	}
 
 	closeproc(ptab);
