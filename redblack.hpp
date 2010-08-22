@@ -43,7 +43,6 @@ class redblacknode{
 template <typename NODE>
 class redblacktree {
 	private:
-		int depth; //helps with drawing
 		void balanceinsert(NODE*);
 		void rotate3(NODE*);
 		void rotate2(NODE*);
@@ -57,7 +56,7 @@ class redblacktree {
 		void countup(NODE*, int&) const;
 	public:
 		NODE* root;
-		void insertnode(NODE*, NODE*, int d = 1);
+		void insertnode(NODE*, NODE*);
 		bool removenode(NODE&);
 		bool find(NODE&) const;
 		NODE* min() const;
@@ -200,7 +199,6 @@ template <typename NODE> void redblacktree<NODE>::free(NODE* v)
 template <typename NODE> redblacktree<NODE>::redblacktree()
 {
 	root = NULL;
-	depth = 0;
 }
 
 // turn line of two reds and a black into black with two children
@@ -400,12 +398,11 @@ template <typename NODE> void redblacktree<NODE>::balanceinsert(NODE* node)
 }
 
 template <typename NODE> void redblacktree<NODE>::insertnode(NODE* insert,
-							NODE* node, int deep)
+							NODE* node)
 {
 	if (node == NULL) {
 		root = insert;
 		root->colour = 0;
-		depth = deep;
 		return;
 	}
 	if (insert->lessthan(node)) { 
@@ -414,18 +411,16 @@ template <typename NODE> void redblacktree<NODE>::insertnode(NODE* insert,
 			node->left->up = node;
 			node = node->left;
 			balanceinsert(node);
-			if (depth < deep) depth = deep;
 		} else 
-			insertnode(insert, node->left, ++deep);
+			insertnode(insert, node->left);
 	} else {
 		if (node->right == NULL) {
 			node->right = insert;
 			node->right->up = node;
 			node = node->right;
 			balanceinsert(node);
-			if (depth < deep) depth = deep;
 		} else
-			insertnode(insert, node->right, ++deep);
+			insertnode(insert, node->right);
 	}
 }
 

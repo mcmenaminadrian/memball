@@ -13,6 +13,52 @@ using namespace std;
 
 static int pagesize = 4096;
 
+class procholder {
+	friend ostream& operator<<(ostream&, procholder&);
+
+	public:
+		procholder(){}; // needed for template code to work
+		procholder(unsigned long long);
+		void setcmd(char*);
+		const string getcmd() const;
+		bool operator==(procholder&) const;
+		bool operator<(procholder&) const;
+	private:
+		unsigned long long vhold;
+		string cmd;
+};
+
+ostream& operator<<(ostream& os, procholder& p)
+{
+	os << p.vhold;
+	return os;
+}
+
+procholder::procholder(unsigned long long v)
+{
+	vhold = v;
+}
+
+void procholder::setcmd(char* str)
+{
+	cmd = string(str);
+}
+
+const string procholder::getcmd() const
+{
+	return cmd;
+}
+
+bool procholder::operator==(procholder& ph) const
+{
+	return (vhold == ph.vhold);
+}
+
+bool procholder::operator<(procholder& ph) const
+{
+	return (vhold < ph.vhold);
+}
+
 template <typename R> void show_preorder(R* node)
 {
 	if (node == NULL)
@@ -29,6 +75,8 @@ template <typename R> void show_preorder(R* node)
 
 void usage()
 {
+	cout << "Memball is copyright(c) Adrian McMenamin, 2010" << endl;
+	cout << "And is licensed for use under version 2+ of the GPL" << endl;
 	cout << "Correct usage is ./memball [--option] [--dataopts]";
 	cout << " [-f filename]" << endl;
 	cout << "Options are:" << endl;
@@ -36,7 +84,8 @@ void usage()
 	cout << "--tex		LaTeX output" << endl;
 	cout << "--plain 	Plain text output" << endl;
 	cout << "Data options are:" << endl;
-	cout << "--cpu		CPU time" << endl;
+	cout << "--cpu0		CPU time (jiffies) including zero" << endl;
+	cout << "--cpu		CPU time (jiffies) excluding zero" << endl;
 	cout << "--mem		Allocated memory (default)" << endl;
 	cout << "--virt		Virtual memory allocated" << endl;
 	cout << "--share	Shared memory allocated" << endl;
@@ -44,12 +93,6 @@ void usage()
 
 int main(int argc, char* argv[])
 {
-
-	//default is to output GraphML
-	// --gxml GRAPHML output
-	// --tex TEX output
-	// --plain plain text output
-
 	bool gxml = true;
 	bool tex = false;
 	bool plain = false;
@@ -58,6 +101,7 @@ int main(int argc, char* argv[])
 	bool virtsize = false;
 	bool sharesize = false;
 	bool cputime = false;
+	bool cputime0 = false;
 	string filename;
 
 	int z;
@@ -95,8 +139,18 @@ int main(int argc, char* argv[])
 		
 		}
 
+		if (strcmp(argv[z], "--cpu0") == 0) {
+			cputime0 = true;
+			cputime = false;
+			procmem = false;
+			virtsize = false;
+			sharesize = false;
+			continue;
+		}
+
 		if (strcmp(argv[z], "--cpu") == 0) {
 			cputime = true;
+			cputime0 = false;
 			procmem = false;
 			virtsize = false;
 			sharesize = false;
@@ -105,6 +159,7 @@ int main(int argc, char* argv[])
 
 		if (strcmp(argv[z], "--mem") == 0) {
 			cputime = false;
+			cputime0 = false;
 			procmem = true;
 			virtsize = false;
 			sharesize = false;
@@ -113,6 +168,7 @@ int main(int argc, char* argv[])
 
 		if (strcmp(argv[z], "--share") == 0) {
 			cputime = false;
+			cputime0 = false;
 			procmem = false;
 			virtsize = false;
 			sharesize = true;
@@ -121,6 +177,7 @@ int main(int argc, char* argv[])
 
 		if (strcmp(argv[z], "--virt") == 0) {
 			cputime = false;
+			cputime0 = false;
 			procmem = false;
 			virtsize = true;
 			sharesize = false;
@@ -142,18 +199,18 @@ int main(int argc, char* argv[])
 	}
 
 	pagesize = getpagesize();
-	redblacktree< redblacknode<unsigned long long> >* proctree;
-	proctree = new redblacktree<redblacknode<unsigned long long> >();
+	redblacktree<redblacknode<procholder> >* proctree;
+	proctree = new redblacktree<redblacknode<procholder> >();
 
 	PROCTAB* ptab = openproc(PROC_FILLMEM|PROC_FILLSTAT);
 	proc_t* proc_details;
 
 	while (proc_details = readproc(ptab, NULL))
 	{
-		//ignore 0 memory but not 0 cpu time
 		if (sharesize && proc_details->share) {
 			proctree->insertnode(new
-			redblacknode<unsigned long long>(proc_details->share),
+			redblacknode<procholder>(
+			procholder(proc_details->share)),
 			proctree->root);
 			free(proc_details);
 			continue;
@@ -161,7 +218,8 @@ int main(int argc, char* argv[])
 
 		if (virtsize && proc_details->size) {
 			proctree->insertnode(new
-			redblacknode<unsigned long long>(proc_details->size),
+			redblacknode<procholder>
+			(procholder(proc_details->size)),
 			proctree->root);
 			free(proc_details);
 			continue;
@@ -169,23 +227,36 @@ int main(int argc, char* argv[])
 
 		if (procmem && proc_details->resident) {
 			proctree->insertnode(new
-			redblacknode<unsigned long long>(proc_details->resident), 
+			redblacknode<procholder>
+			(procholder(proc_details->resident)), 
 			proctree->root);
 			free(proc_details);
 			continue;
 		}
 
-		if (cputime) {  
+		if (cputime0) {  
 			proctree->
 				insertnode(new
-				redblacknode<unsigned long long>(
-				proc_details->utime +
-				proc_details->stime),
+				redblacknode<procholder>(
+				procholder(proc_details->utime +
+				proc_details->stime)),
 				proctree->root);
 			free(proc_details);
 			continue;
-			
 		}
+
+		if (cputime && (proc_details->utime || proc_details->stime)) {
+			proctree->
+				insertnode(new
+				redblacknode<procholder>(procholder(
+				proc_details->utime +
+				proc_details->stime)),
+				proctree->root);
+			free(proc_details);
+			continue;
+		}
+
+
 		free(proc_details);
 		
 	}
