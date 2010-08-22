@@ -27,11 +27,16 @@ class redblacknode{
 
 	template <typename Z> friend ostream& operator<<(ostream& os,
 		redblacknode<Z>* rbtp);
-	template <typename Z> friend void streamrbt(ostream& os, redblacknode<Z>* node);
-	template <typename Z> friend void drawnextroot(redblacknode<Z>* node, int, ostream&);
-	template <typename Z> friend void drawTEXtree(redblacknode<Z>* node, ostream&);
-	template <typename Z> friend void drawnextxml(redblacknode<Z>* node, int, int&, ostream&);
-	template <typename Z> friend void drawGraphMLtree(redblacknode<Z>* node, ostream&);
+	template <typename Z> friend void 
+		streamrbt(ostream& os, redblacknode<Z>* node);
+	template <typename Z> friend void
+		drawnextroot(redblacknode<Z>* node, int, ostream&);
+	template <typename Z> friend void
+		drawTEXtree(redblacknode<Z>* node, ostream&);
+	template <typename Z> friend void
+		drawnextxml(redblacknode<Z>* node, int, int&, ostream&);
+	template <typename Z> friend void
+		drawGraphMLtree(redblacknode<Z>* node, ostream&);
 
 	private:
 		T value;
@@ -722,7 +727,7 @@ template <typename T> void drawnextroot(redblacknode< T >* rbn, int k, ostream& 
 {
 	for (int x = 0; x < k; x++)
 		outstream << " ";
-	outstream << "\\pstree{\\TCircle[radius=1cm";
+	outstream << "\\pstree[treesep=0.5cm, levelsep=5cm]{\\TCircle[radius=1.5cm";
 	if (rbn->colour == 1)
 		outstream << ",linecolor=red";
 	outstream << "]";
@@ -763,7 +768,16 @@ template <typename T> void drawnextroot(redblacknode< T >* rbn, int k, ostream& 
 
 template <typename T> void drawTEXtree(redblacknode< T >* rbn, ostream& outstream)
 {
-	outstream << "\\documentclass{a0poster}" << endl;
+	outstream << "\\documentclass[final]{beamer}" << endl;
+	outstream << "\\mode<presentation>{" << endl;
+	outstream << "\\usetheme{Berlin}}" << endl;
+	outstream << "\\usepackage[orientation=landscape,size=custom,width=200,height=90" << endl;
+#ifdef ADDITIONAL_INFO
+	string name = rbn->additional_info();
+	if (name.length() > 0)
+		outstream << ",scale=0.4";
+#endif
+	outstream << ",debug]{beamerposter}" << endl;
 	outstream << "\\usepackage{pstricks,pst-tree}" << endl;
 	outstream << "\\begin{document}" << endl;
 	if (rbn != NULL) 
