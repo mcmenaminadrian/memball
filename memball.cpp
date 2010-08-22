@@ -1,9 +1,12 @@
 #include <iostream>
 #include <fstream>
+#include <string>
 #include "string.h"
 #include <stdlib.h>
 #include "/usr/include/proc/readproc.h"
+#define ADDITIONAL_INFO
 #include "redblack.hpp"
+#undef ADDITIONAL_INFO
 
 using namespace std;
 
@@ -19,8 +22,8 @@ class procholder {
 	public:
 		procholder(){}; // needed for template code to work
 		procholder(unsigned long long);
-		void setcmd(char*);
-		const string getcmd() const;
+		void setadditional(char*);
+		const string getadditional() const;
 		bool operator==(procholder&) const;
 		bool operator<(procholder&) const;
 	private:
@@ -39,12 +42,12 @@ procholder::procholder(unsigned long long v)
 	vhold = v;
 }
 
-void procholder::setcmd(char* str)
+void procholder::setadditional(char* str)
 {
 	cmd = string(str);
 }
 
-const string procholder::getcmd() const
+const string procholder::getadditional() const
 {
 	return cmd;
 }
@@ -89,6 +92,8 @@ void usage()
 	cout << "--mem		Allocated memory (default)" << endl;
 	cout << "--virt		Virtual memory allocated" << endl;
 	cout << "--share	Shared memory allocated" << endl;
+	cout << "Additional coptions are:" << endl;
+	cout << "--cmd		Process name" << endl;
 }
 
 int main(int argc, char* argv[])
@@ -102,6 +107,7 @@ int main(int argc, char* argv[])
 	bool sharesize = false;
 	bool cputime = false;
 	bool cputime0 = false;
+	bool cmdline = false;
 	string filename;
 
 	int z;
@@ -136,7 +142,6 @@ int main(int argc, char* argv[])
 			plain = true;
 			gxml = false;
 			continue;	
-		
 		}
 
 		if (strcmp(argv[z], "--cpu0") == 0) {
@@ -183,6 +188,11 @@ int main(int argc, char* argv[])
 			sharesize = false;
 			continue;
 		}
+
+		if (strcmp(argv[z], "--cmd") == 0) {
+			cmdline = true;
+			continue;
+		}
 		
 		if (strcmp(argv[z], "-f") == 0) {
 			fileout = true;
@@ -202,60 +212,36 @@ int main(int argc, char* argv[])
 	redblacktree<redblacknode<procholder> >* proctree;
 	proctree = new redblacktree<redblacknode<procholder> >();
 
-	PROCTAB* ptab = openproc(PROC_FILLMEM|PROC_FILLSTAT);
+	PROCTAB* ptab = openproc(PROC_FILLMEM|PROC_FILLSTAT|PROC_FILLSTATUS);
 	proc_t* proc_details;
 
 	while (proc_details = readproc(ptab, NULL))
 	{
-		if (sharesize && proc_details->share) {
-			proctree->insertnode(new
-			redblacknode<procholder>(
-			procholder(proc_details->share)),
-			proctree->root);
-			free(proc_details);
-			continue;
-		}
+		redblacknode<procholder>* rbnp = NULL;
+		procholder ph;
 
-		if (virtsize && proc_details->size) {
-			proctree->insertnode(new
-			redblacknode<procholder>
-			(procholder(proc_details->size)),
-			proctree->root);
-			free(proc_details);
-			continue;
-		}
+		if (sharesize && proc_details->share)
+			ph = procholder(proc_details->share);
 
-		if (procmem && proc_details->resident) {
-			proctree->insertnode(new
-			redblacknode<procholder>
-			(procholder(proc_details->resident)), 
-			proctree->root);
-			free(proc_details);
-			continue;
-		}
+		if (virtsize && proc_details->size)
+			ph = procholder(proc_details->size);
 
-		if (cputime0) {  
-			proctree->
-				insertnode(new
-				redblacknode<procholder>(
-				procholder(proc_details->utime +
-				proc_details->stime)),
-				proctree->root);
-			free(proc_details);
-			continue;
-		}
+		if (procmem && proc_details->resident)
+			ph = procholder(proc_details->resident);
 
-		if (cputime && (proc_details->utime || proc_details->stime)) {
-			proctree->
-				insertnode(new
-				redblacknode<procholder>(procholder(
-				proc_details->utime +
-				proc_details->stime)),
-				proctree->root);
-			free(proc_details);
-			continue;
-		}
+		if (cputime0)
+			ph = procholder(proc_details->utime +
+				proc_details->stime);
 
+		if (cputime && (proc_details->utime || proc_details->stime))
+			ph = procholder(proc_details->utime +
+				proc_details->stime);
+
+		if (cmdline)
+			ph.setadditional(proc_details->cmd);
+
+		rbnp = new redblacknode<procholder>(ph);
+		proctree->insertnode(rbnp, proctree->root);
 
 		free(proc_details);
 		
@@ -263,7 +249,6 @@ int main(int argc, char* argv[])
 
 	closeproc(ptab);
 	
-
 	if (fileout == true) {
 		ofstream outstream(filename.c_str());
 		if (gxml)

@@ -6,6 +6,22 @@ using namespace std;
 // Licensed under the GNU GPL version 2
 // or any later version at your discretion
 
+string sanatiseforlatex(string& input, size_t x)
+{
+	size_t opos = input.find("_", x);
+	if (opos != string::npos) {
+		string saner;
+		if (opos == 0) 
+			saner = "\\_" + input.substr(1);
+		else 
+			saner = input.substr(0, opos - 1) + "\\_" +
+				input.substr(opos + 1);
+		x = x + 2;
+		input = sanatiseforlatex(saner, x);
+	}
+	return input;
+}
+
 template <typename T>
 class redblacknode{
 
@@ -19,6 +35,9 @@ class redblacknode{
 
 	private:
 		T value;
+#ifdef ADDITIONAL_INFO
+		const string additional_info() const;
+#endif
 	
 	public:
 		int colour;
@@ -66,7 +85,15 @@ class redblacktree {
 		~redblacktree();
 };
 
-template <typename T> void redblacknode<T>::showinorder(redblacknode<T>* node) const
+#ifdef ADDITIONAL_INFO
+template <typename T> const string redblacknode<T>::additional_info() const
+{
+	return value.getadditional();
+}
+#endif
+
+template <typename T> void redblacknode<T>::showinorder(redblacknode<T>* node)
+									const
 {
 	if (node == NULL)
 		return;
@@ -75,7 +102,8 @@ template <typename T> void redblacknode<T>::showinorder(redblacknode<T>* node) c
 	showinorder(node->right);
 }
 
-template <typename T> void redblacknode<T>::showpreorder(redblacknode<T>* node) const
+template <typename T> void redblacknode<T>::showpreorder(redblacknode<T>* node)
+									const
 {
 	if (node == NULL)
 		return;
@@ -84,7 +112,8 @@ template <typename T> void redblacknode<T>::showpreorder(redblacknode<T>* node) 
 	showpreorder(node->right);
 }
 
-template <typename T> void redblacknode<T>::showpostorder(redblacknode<T>* node) const
+template <typename T> void redblacknode<T>::showpostorder(redblacknode<T>* node)
+									const
 {
 	if (node == NULL)
 		return;
@@ -668,6 +697,11 @@ template <typename T> void streamrbt(ostream& os, redblacknode<T>* node)
 	if (node == NULL) 
 		return;
 	os << "(" << node->value;
+#ifdef ADDITIONAL_INFO
+	string name = node->additional_info();
+	if (name.length()) 
+		os << " " << node->additional_info() << " ";
+#endif
 	if (node->colour == 0)
 		os << "[BLACK]";
 	else
@@ -688,10 +722,18 @@ template <typename T> void drawnextroot(redblacknode< T >* rbn, int k, ostream& 
 {
 	for (int x = 0; x < k; x++)
 		outstream << " ";
-	outstream << "\\pstree{\\Tcircle";
+	outstream << "\\pstree{\\TCircle[radius=1cm";
 	if (rbn->colour == 1)
-		outstream << "[linecolor=red]";
-	outstream << "{" << rbn->value << "}}{" << endl;
+		outstream << ",linecolor=red";
+	outstream << "]";
+	outstream << "{" << rbn->value;
+#ifdef ADDITIONAL_INFO
+	string name = rbn->additional_info();
+	name = sanatiseforlatex(name, 0);
+	if (name.length() > 0)
+		outstream << ":" << name;
+#endif
+	outstream << "}}{" << endl;
 	if (rbn->left == NULL && rbn->right == NULL) {
 		for (int x = 0; x < k; x++)
 			outstream << " ";
