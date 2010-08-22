@@ -792,6 +792,11 @@ template <typename T> void drawnextxml(redblacknode<T>* rbn, int x, int& cnt, os
 	if (rbn->colour == 1)
 		outstream << "<data key=\"c\">red</data>" << endl;
 	outstream << "<data key=\"v\">" << rbn->value << "</data>" << endl;
+#ifdef ADDITIONAL_INFO
+	outstream << "<data key=\"additional\"><![CDATA["
+		<< rbn->additional_info();
+	outstream << "]]></data>" << endl;
+#endif
 	outstream << "</node>" << endl;
 	outstream << "<edge id=\"l" << x << "\" source=\"" << x;
 	outstream << "\" target =\"" << ++cnt << "\" />" << endl;
