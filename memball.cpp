@@ -110,8 +110,7 @@ int main(int argc, char* argv[])
 	bool cmdline = false;
 	string filename;
 
-	int z;
-	for (z = 1; z < argc; z++)
+	for (int z = 1; z < argc; z++)
 	{
 		if (argv[z][0] != '-') {
 			usage();
