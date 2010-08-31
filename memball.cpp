@@ -16,7 +16,7 @@ using namespace std;
 
 static int pagesize = 4096;
 
-class procholder {
+class procholder { //holds process details
 	friend ostream& operator<<(ostream&, procholder&);
 
 	public:
@@ -92,7 +92,7 @@ void usage()
 	cout << "--mem		Allocated memory (default)" << endl;
 	cout << "--virt		Virtual memory allocated" << endl;
 	cout << "--share	Shared memory allocated" << endl;
-	cout << "Additional coptions are:" << endl;
+	cout << "Additional options are:" << endl;
 	cout << "--cmd		Process name" << endl;
 }
 
@@ -210,8 +210,12 @@ int main(int argc, char* argv[])
 	pagesize = getpagesize();
 	redblacktree<redblacknode<procholder> >* proctree;
 	proctree = new redblacktree<redblacknode<procholder> >();
+	if (!proctree)
+		throw bad_alloc();
 
 	PROCTAB* ptab = openproc(PROC_FILLMEM|PROC_FILLSTAT|PROC_FILLSTATUS);
+	if (!ptab)
+		return 2;
 	proc_t* proc_details;
 
 	while (proc_details = readproc(ptab, NULL))
@@ -240,6 +244,8 @@ int main(int argc, char* argv[])
 			ph.setadditional(proc_details->cmd);
 
 		rbnp = new redblacknode<procholder>(ph);
+		if (!rbnp)
+			throw bad_alloc();
 		proctree->insertnode(rbnp, proctree->root);
 
 		free(proc_details);
