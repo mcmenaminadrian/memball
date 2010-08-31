@@ -458,7 +458,8 @@ template <typename NODE> void redblacktree<NODE>::insertnode(NODE* insert,
 	}
 }
 
-template <typename NODE> NODE* redblacktree<NODE>::locatenode(NODE* v, NODE* node) const
+template <typename NODE> NODE* redblacktree<NODE>::locatenode(NODE* v,
+		NODE* node) const
 {
 	if (node == NULL)
 		return node;
@@ -723,11 +724,13 @@ template <typename T> ostream& operator<<(ostream& os, redblacknode<T>* rbn)
 	return os;
 }		
 
-template <typename T> void drawnextroot(redblacknode< T >* rbn, int k, ostream& outstream) 
+template <typename T> void drawnextroot(redblacknode< T >* rbn, int k,
+		ostream& outstream) 
 {
 	for (int x = 0; x < k; x++)
 		outstream << " ";
-	outstream << "\\pstree[treesep=0.5cm, levelsep=5cm]{\\TCircle[radius=1.5cm";
+	outstream << "\\pstree[treesep=0.5cm, levelsep=5cm]";
+	outstream << "{\\TCircle[radius=1.5cm";
 	if (rbn->colour == 1)
 		outstream << ",linecolor=red";
 	outstream << "]";
@@ -766,12 +769,14 @@ template <typename T> void drawnextroot(redblacknode< T >* rbn, int k, ostream& 
 }
 
 
-template <typename T> void drawTEXtree(redblacknode< T >* rbn, ostream& outstream)
+template <typename T> void drawTEXtree(redblacknode< T >* rbn,
+		ostream& outstream)
 {
 	outstream << "\\documentclass[final]{beamer}" << endl;
 	outstream << "\\mode<presentation>{" << endl;
 	outstream << "\\usetheme{Berlin}}" << endl;
-	outstream << "\\usepackage[orientation=landscape,size=custom,width=200,height=90" << endl;
+	outstream << "\\usepackage[orientation=landscape,size=custom,";
+	outstream << "width=200,height=90" << endl;
 #ifdef ADDITIONAL_INFO
 	string name = rbn->additional_info();
 	if (name.length() > 0)
@@ -785,9 +790,11 @@ template <typename T> void drawTEXtree(redblacknode< T >* rbn, ostream& outstrea
 	outstream << "\\end{document}" << endl;
 }
 
-template <typename T> void drawnextxml(redblacknode<T>* rbn, int x, int& cnt, ostream& outstream)
+template <typename T> void drawnextxml(redblacknode<T>* rbn, int x, int& cnt,
+		ostream& outstream)
 {
-	outstream << "<graph id=\"" << x << "\" edgedefault=\"directed\">" << endl;
+	outstream << "<graph id=\"" << x << "\" edgedefault=\"directed\">" <<
+		endl;
 	outstream << "<node id =\"" << x << "\" >" << endl;
 	if (rbn->colour == 1)
 		outstream << "<data key=\"c\">red</data>" << endl;
@@ -813,7 +820,8 @@ template <typename T> void drawnextxml(redblacknode<T>* rbn, int x, int& cnt, os
 	outstream << "</graph>" << endl;
 }
 
-template <typename T> void drawGraphMLtree(redblacknode<T>* rbn, ostream& outstream)
+template <typename T> void drawGraphMLtree(redblacknode<T>* rbn,
+		ostream& outstream)
 {
 	outstream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
 	outstream <<
