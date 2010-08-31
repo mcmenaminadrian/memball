@@ -816,16 +816,33 @@ template <typename T> void drawnextxml(redblacknode<T>* rbn, int x, int& cnt, os
 template <typename T> void drawGraphMLtree(redblacknode<T>* rbn, ostream& outstream)
 {
 	outstream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
-	outstream << "<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\"" << endl;
-	outstream << "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" << endl;
-	outstream << "xsi:schemaLocation=\"http://graphml.graphdrawing.org/xmlns" << endl;
-	outstream << "http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd\">" << endl;
-	outstream << "<key id=\"c\" for=\"node\" attr.name=\"colour\" attr.type=\"string\" >" << endl;
+	outstream <<
+		"<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\""
+		<< endl;
+	outstream <<
+		"xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
+		<< endl;
+	outstream <<
+		"xsi:schemaLocation=\"http://graphml.graphdrawing.org/xmlns"
+		<< endl;
+	outstream <<
+		"http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd\">"
+		<< endl;
+	outstream <<
+		"<key id=\"c\" for=\"node\" ";
+	outstream << "attr.name=\"colour\" attr.type=\"string\" >" << endl;
 	outstream << "<default>black</default>" << endl;
 	outstream << "</key>" << endl;
-	outstream << "<key id=\"v\" for=\"node\" attr.name=\"value\" attr.type=\"string\" >" << endl;
+	outstream <<
+		"<key id=\"v\" for=\"node\" attr.name=\"value\" ";
+	outstream << "attr.type=\"string\" >" << endl;
 	outstream << "<default>NULL</default>" << endl;
 	outstream << "</key>" << endl;
+#ifdef ADDITIONAL_INFO
+	outstream <<
+		"<key id=\"additional\" for=\"node\" attr.name=\"value\" ";
+	outstream << "attr.type=\"string\" />" << endl;
+#endif
 	outstream << "<graph id=\"redblacktree-";
 	time_t timenow;
 	outstream << time(&timenow) << "\" edgedefault=\"directed\">" << endl;
