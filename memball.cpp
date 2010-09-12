@@ -14,8 +14,6 @@ using namespace std;
 // Licensed under the GNU GPL v2
 // Or any later version at your discretion
 
-static int pagesize = 4096;
-
 class procholder { //holds process details
 	friend ostream& operator<<(ostream&, procholder&);
 
@@ -81,7 +79,7 @@ void usage()
 	cout << "Memball is copyright(c) Adrian McMenamin, 2010" << endl;
 	cout << "And is licensed for use under version 2+ of the GPL" << endl;
 	cout << "Correct usage is ./memball [--option] [--dataopts]";
-	cout << " [-f filename]" << endl;
+	cout << " [--f filename]" << endl;
 	cout << "Options are:" << endl;
 	cout << "--gxml		GraphML output (default)" << endl;
 	cout << "--tex		LaTeX output" << endl;
@@ -93,7 +91,8 @@ void usage()
 	cout << "--virt		Virtual memory allocated" << endl;
 	cout << "--share	Shared memory allocated" << endl;
 	cout << "Additional options are:" << endl;
-	cout << "--cmd		Process name" << endl;
+	cout << "--cmd		Insert process name in output" << endl;
+	cout << "--r [s]	Repeat every s seconds" << endl;
 }
 
 int main(int argc, char* argv[])
@@ -108,18 +107,22 @@ int main(int argc, char* argv[])
 	bool cputime = false;
 	bool cputime0 = false;
 	bool cmdline = false;
+	bool repeat = false;
+	int repinter = -1;
 	string filename;
 
 	for (int z = 1; z < argc; z++)
 	{
+		if (strcmp(argv[z], "-?") == 0 ||
+			strcmp(argv[z], "?") == 0 ||
+			strcmp(argv[z], "--?") == 0) {
+			usage();
+			return 0;
+		}
+
 		if (argv[z][0] != '-') {
 			usage();
 			return 1;
-		}
-
-		if (strcmp(argv[z], "-?") == 0) {
-			usage();
-			return 0;
 		}
 
 		if (strcmp(argv[z], "--gxml") == 0) {
@@ -193,87 +196,102 @@ int main(int argc, char* argv[])
 			continue;
 		}
 		
-		if (strcmp(argv[z], "-f") == 0) {
+		if (strcmp(argv[z], "--f") == 0) {
 			fileout = true;
-			if (z + 2 != argc) {
+			if (z + 2 > argc) {
 				usage();
-				cout << z << "Specified file name must be last"
-					<< endl;
+				cout << "Must specify a file name" << endl;
 				return 1;
 			}
 			filename = argv[z + 1];
-			break;
+			z++;
+			continue;
 		}
-			
+
+		if (strcmp(argv[z], "--r") == 0) {
+			repeat = true;
+			if (z + 2 > argc) {
+				usage();
+				cout << "Must specify an interval" << endl;
+				return 1;
+			}
+			repinter = atoi(argv[z + 1]);
+			z++;
+		}		
 	}
 
-	pagesize = getpagesize();
-	redblacktree<redblacknode<procholder> >* proctree;
-	proctree = new redblacktree<redblacknode<procholder> >();
-	if (!proctree)
-		throw bad_alloc();
-
-	PROCTAB* ptab = openproc(PROC_FILLMEM|PROC_FILLSTAT|PROC_FILLSTATUS);
-	if (!ptab)
-		return 2;
-	proc_t* proc_details;
-
-	while (proc_details = readproc(ptab, NULL))
-	{
-		redblacknode<procholder>* rbnp = NULL;
-		procholder ph;
-
-		if (sharesize && proc_details->share)
-			ph = procholder(proc_details->share);
-
-		if (virtsize && proc_details->size)
-			ph = procholder(proc_details->size);
-
-		if (procmem && proc_details->resident)
-			ph = procholder(proc_details->resident);
-
-		if (cputime0)
-			ph = procholder(proc_details->utime +
-				proc_details->stime);
-
-		if (cputime && (proc_details->utime || proc_details->stime))
-			ph = procholder(proc_details->utime +
-				proc_details->stime);
-
-		if (cmdline)
-			ph.setadditional(proc_details->cmd);
-
-		rbnp = new redblacknode<procholder>(ph);
-		if (!rbnp)
+	do {
+		redblacktree<redblacknode<procholder> >* proctree;
+		proctree = new redblacktree<redblacknode<procholder> >();
+		if (!proctree)
 			throw bad_alloc();
-		proctree->insertnode(rbnp, proctree->root);
 
-		free(proc_details);
+		PROCTAB* ptab = openproc(PROC_FILLMEM|PROC_FILLSTAT|
+			PROC_FILLSTATUS);
+		if (!ptab)
+			return 2;
+		proc_t* proc_details;
+
+		while (proc_details = readproc(ptab, NULL))
+		{
+			redblacknode<procholder>* rbnp = NULL;
+			procholder ph;
+
+			if (sharesize && proc_details->share)
+				ph = procholder(proc_details->share);
+
+			if (virtsize && proc_details->size)
+				ph = procholder(proc_details->size);
+
+			if (procmem && proc_details->resident)
+				ph = procholder(proc_details->resident);
+
+			if (cputime0)
+				ph = procholder(proc_details->utime +
+					proc_details->stime);
+
+			if (cputime && (proc_details->utime ||
+				proc_details->stime))
+				ph = procholder(proc_details->utime +
+					proc_details->stime);
+
+			if (cmdline)
+				ph.setadditional(proc_details->cmd);
+
+			rbnp = new redblacknode<procholder>(ph);
+			if (!rbnp)
+				throw bad_alloc();
+			proctree->insertnode(rbnp, proctree->root);
+
+			free(proc_details);
 		
-	}
+		}
 
-	closeproc(ptab);
+		closeproc(ptab);
 	
-	if (fileout == true) {
-		ofstream outstream(filename.c_str());
-		if (gxml)
-			drawGraphMLtree(proctree->root, outstream);
-		else if (tex)
-			drawTEXtree(proctree->root, outstream);
-		else
-			outstream << proctree->root << endl;
-		outstream.close();	
-	}
-	else {
-		if (gxml)
-			drawGraphMLtree(proctree->root, cout);
-		else if (tex)
-			drawTEXtree(proctree->root, cout);
-		else
-			cout << proctree->root << endl;
-	}	
+		if (fileout == true) {
+			ofstream outstream(filename.c_str());
+			if (gxml)
+				drawGraphMLtree(proctree->root, outstream);
+			else if (tex)
+				drawTEXtree(proctree->root, outstream);
+			else
+				outstream << proctree->root << endl;
+			outstream.close();	
+		}
+		else {
+			if (gxml)
+				drawGraphMLtree(proctree->root, cout);
+			else if (tex)
+				drawTEXtree(proctree->root, cout);
+			else
+				cout << proctree->root << endl;
+		}	
 
-	delete proctree;	
+		delete proctree;
+		if (repinter > 0)
+			sleep(repinter);
+	} while (repeat);	
 
 	return 0;
 }
