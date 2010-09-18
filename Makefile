@@ -1,7 +1,7 @@
 all: memball
 
 memball: main.o
-	g++ -o memball -Wall main.o -lproc
+	g++ -O2 -o memball -Wall main.o -lproc
 
 main.o: redblack.hpp memball.cpp
-	g++ -o main.o -c -Wall memball.cpp
+	g++ -O2 -o main.o -c -Wall memball.cpp
